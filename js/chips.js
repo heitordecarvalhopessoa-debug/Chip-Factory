@@ -11,12 +11,12 @@ function placeChip(index) {
 
     if (['pan', 'link', 'move'].includes(selectedTool)) return;
     
-    const costs = { 'charger': 50, 'giver': 20, 'seller': 30, 'overclock': 80, 'storage': 40, 'splitter': 60, 'miner': 120 };
+    const costs = { 'charger': 50, 'giver': 20, 'seller': 30, 'overclock': 80, 'storage': 40, 'splitter': 60, 'miner': 120, 'battery': 60 };
     const cost = costs[selectedTool];
 
     if (selectedTool === 'overclock' && level < 3) return;
     if (selectedTool === 'miner' && level < 4) return;
-    if (selectedTool === 'storage' && level < 2) return;
+    if ((selectedTool === 'storage' || selectedTool === 'battery') && level < 2) return;
     if (selectedTool === 'splitter' && level < 2) return;
 
     if (cost && money >= cost && coords.y <= gridSize - 4 && coords.x <= gridSize - 4 && isAreaFree(index, 4, 4)) {
@@ -56,9 +56,10 @@ function createChip(type, index, w, h) {
     let portsHTML = '';
     if (type === 'charger') portsHTML = '<div class="port out power"></div>';
     if (type === 'giver')   portsHTML = '<div class="port in power"></div><div class="port in speed"></div><div class="port out data"></div>';
-    if (type === 'miner')   portsHTML = '<div class="port in power"></div><div class="port in speed"></div><div class="port out data"></div>';
+    if (type === 'miner')   portsHTML = '<div class="port in energy"></div><div class="port in speed"></div><div class="port out data"></div>';
     if (type === 'seller')  portsHTML = '<div class="port in data"></div>';
-    if (type === 'overclock') portsHTML = '<div class="port in power"></div><div class="port out speed"></div>';
+    if (type === 'battery') portsHTML = '<div class="port in power"></div><div class="port out energy"></div>';
+    if (type === 'overclock') portsHTML = '<div class="port in energy"></div><div class="port out speed"></div>';
     if (type === 'storage') portsHTML = '<div class="port in data"></div><div class="port out data"></div>';
     if (type === 'splitter') {
         portsHTML = '<div class="port in data"></div>' + 
@@ -66,7 +67,11 @@ function createChip(type, index, w, h) {
                     '<div class="port out data" style="left: 70%"></div>';
     }
 
-    div.innerHTML = `${portsHTML}<div style="pointer-events:none; z-index:1;">${type.toUpperCase()}<br><span class="status"></span></div>`;
+    let internalHTML = `<div style="pointer-events:none; z-index:1;">${type.toUpperCase()}<br><span class="status"></span></div>`;
+    if (type === 'battery') {
+        internalHTML += `<div class="energy-bar-container"><div class="energy-bar-fill" id="energy-${chipId}"></div></div>`;
+    }
+    div.innerHTML = portsHTML + internalHTML;
 
     if (type === 'splitter') {
         const btn = document.createElement('button');
@@ -110,7 +115,8 @@ function createChip(type, index, w, h) {
         bounds: { x: coords.x, y: coords.y, w, h },
         powered: false,
         data: 0,
-        overclocked: false
+        overclocked: false,
+        energy: type === 'battery' ? 0 : undefined
     };
     chips.push(chipObj);
 }
