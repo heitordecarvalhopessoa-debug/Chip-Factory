@@ -10,19 +10,31 @@ setInterval(() => {
             conn.to.powered = true;
         }
 
+        if (conn.type === 'power' && conn.from.powered && conn.to.type === 'battery') {
+            conn.to.energy = Math.min(100, (conn.to.energy || 0) + 10);
+        }
+
+        if (conn.type === 'energy' && conn.from.type === 'battery' && conn.from.energy > 0) {
+            conn.to.powered = true;
+            conn.from.energy -= 2;
+            if (conn.from.energy < 0) conn.from.energy = 0;
+        }
+
         if (conn.type === 'speed' && conn.from.type === 'overclock' && conn.from.powered) {
             conn.to.overclocked = true;
         }
 
+        
+        if (conn.type === 'data' && conn.from.data > 0 && conn.from.type !== 'splitter') {
+            
+            let transferAmount = (conn.from.type === 'storage') ? Math.min(conn.from.data, 5) : conn.from.data;
 
-        if (conn.type === 'data' && conn.from.type !== 'splitter' && conn.from.data > 0) {
             if (conn.to.type === 'seller') {
-                const amount = conn.from.data;
-                conn.from.data = 0;
-                processSale(amount, conn.to, conn.from.type);
-            } else if (conn.to.type === 'storage' || conn.to.type === 'splitter') {
-                conn.to.data += conn.from.data;
-                conn.from.data = 0;
+                conn.from.data -= transferAmount;
+                processSale(transferAmount, conn.to, conn.from.type);
+            } else if (conn.to.data !== undefined) {
+                conn.from.data -= transferAmount;
+                conn.to.data += transferAmount;
                 conn.to.element.classList.add('active-flow');
             }
         }
@@ -33,11 +45,13 @@ setInterval(() => {
         if (outConns.length > 0) {
             outConns.forEach(conn => {
                 if (splitter.data > 0) {
-                    splitter.data -= 1;
+                    
+                    const amountToSplit = 1;
+                    splitter.data -= amountToSplit;
                     if (conn.to.type === 'seller') {
-                        processSale(1, conn.to, 'splitter'); 
+                        processSale(amountToSplit, conn.to, 'splitter'); 
                     } else {
-                        conn.to.data += 1;
+                        conn.to.data += amountToSplit;
                         conn.to.element.classList.add('active-flow');
                     }
                 }
@@ -61,6 +75,10 @@ setInterval(() => {
             status.innerHTML = `<div class="status-dot on"></div> OK`;
         } else if (c.type === 'overclock') {
             status.innerHTML = `<div class="status-dot ${c.powered ? 'on' : 'off'}"></div> ${c.powered ? 'BOOST' : 'IDLE'}`;
+        } else if (c.type === 'battery') {
+            status.innerHTML = `<div class="status-dot ${c.energy > 0 ? 'on' : 'off'}"></div> ${Math.floor(c.energy)}%`;
+            const bar = document.getElementById(`energy-${c.id}`);
+            if (bar) bar.style.width = c.energy + '%';
         } else if (c.type === 'seller') {
             status.innerHTML = `<div class="status-dot on"></div> SELL`;
         } else if (c.type === 'storage') {
