@@ -1,9 +1,9 @@
-let money = 100;
+let money = 10000;
 let selectedTool = null;
 let firstSelection = null;
 let pendingPort = null;
 let zoom = 1.0;
-let level = 1;
+let level = 10;
 let xp = 0;
 let xpTarget = 100;
 let camX = 0, camY = 0;
@@ -54,6 +54,14 @@ function selectTool(tool) {
     });
     document.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
     
+    const cursors = {
+        'pan': 'grab',
+        'link': 'crosshair',
+        'delete': 'not-allowed',
+        'move': 'move'
+    }
+    document.body.style.cursor = cursors[tool] || 'default';
+
     if (typeof renderShop === 'function') renderShop();
 }
 
