@@ -1,3 +1,37 @@
 # Chip Factory
 
-**Chip Factory** é um simulador de fábrica minimalista e viciante onde você projeta circuitos integrados para gerar recursos, ganhar dinheiro e evoluir seu nível tecnológico. O jogo combina elementos de estratégia, gestão de recursos e puzzle.
+> A minimalist and addictive factory simulator where you design integrated circuits to thrive.
+
+## About the Game
+
+Chip Factory is a strategic simulator that challenges you to build and optimize chip production lines. The game combines elements of resource management, strategy, and logic puzzles in a clean and intuitive interface.
+
+### Objectives
+
+The main gameplay cycle consists of:
+1. **Buy chips**: Acquire basic components for your board.
+2. **Connect**: Create logical paths and efficient energy flows.
+3. **Generate Profit**: Convert processing into financial resources.
+4. **Scale**: Reinvest your earnings into new components.
+5. **Upgrade**: Improve your chip technology for maximum efficiency.
+6. **Optimize**: Perfect your system to reach the technological peak.
+
+## Features
+
+- **Minimalist Design**: Clean interface focused on gameplay.
+- **Continuous Progression**: Upgrade system that expands player possibilities.
+- **Resource Management**: Balance expenses and earnings to keep your factory running.
+- **Logic Puzzles**: Challenge your mind by organizing connections in the best possible way.
+
+## Technologies Used
+
+The project was developed using pure web technologies, ensuring lightness and accessibility:
+
+*   **HTML5**: Game structure and semantics.
+*   **CSS3**: Styling, responsive layout, and animations.
+*   **JavaScript (ES6+)**: Simulator logic, state management, and interactions.
+
+
+---
+By: Heitor Pessoa
+---
