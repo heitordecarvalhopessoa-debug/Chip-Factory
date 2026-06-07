@@ -53,8 +53,7 @@ body {
     justify-content: center; 
     align-items: center; 
     position: relative; 
-    overflow: hidden; 
-    cursor: grab;
+    overflow: hidden;
 }
 
 #viewport {
@@ -191,6 +190,7 @@ body {
 .giver { background: linear-gradient(135deg, #334155, #64748b); z-index: 1; }
 .seller { background: linear-gradient(135deg, #064e3b, #10b981); z-index: 1; }
 .overclock { background: linear-gradient(135deg, #7c2d12, #f59e0b); }
+.battery { background: linear-gradient(135deg, #1e293b, #0f172a); border: 2px solid #facc15 !important; }
 .storage { background: linear-gradient(135deg, #4c1d95, #8b5cf6); }
 .splitter { background: linear-gradient(135deg, #0f766e, #2dd4bf); }
 .miner { background: linear-gradient(135deg, #451a03, #92400e); }
@@ -219,12 +219,31 @@ body {
 .port.power { background: var(--accent-blue); box-shadow: 0 0 10px var(--accent-blue); }
 .port.data { background: var(--accent-green); box-shadow: 0 0 10px var(--accent-green); }
 .port.speed { background: var(--accent-gold); box-shadow: 0 0 10px var(--accent-gold); }
+.port.energy { background: #ff4444; box-shadow: 0 0 10px #ff4444; }
 
 .port.in { top: -5px; left: 50%; transform: translateX(-50%); }
 .port.out { bottom: -5px; left: 50%; transform: translateX(-50%); }
 
+.energy-bar-container {
+    width: 80%;
+    height: 6px;
+    background: #111;
+    border-radius: 3px;
+    margin-top: 8px;
+    overflow: hidden;
+    border: 1px solid #333;
+}
+.energy-bar-fill {
+    height: 100%;
+    background: #ff4444;
+    width: 0%;
+    transition: width 0.3s ease;
+    box-shadow: 0 0 10px rgba(255, 68, 68, 0.5);
+}
 .chip.giver .port.in.power { left: 30%; }
 .chip.giver .port.in.speed { left: 70%; }
+.chip.miner .port.in.energy { left: 30%; }
+.chip.miner .port.in.speed { left: 70%; }
 
 .add-port-btn {
     position: absolute;
@@ -286,3 +305,45 @@ body {
 }
 .context-menu-item:hover { background: #334155; color: var(--accent-blue); }
 .context-menu-item.delete:hover { background: #450a0a; color: #f87171; }
+
+#custom-cursor {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 28px;
+    height: 28px;
+    pointer-events: none;
+    z-index: 9999;
+    will-change: transform;
+    display: none;
+    width: 32px;
+    height: 32px;
+}
+
+#custom-cursor img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    mix-blend-mode: screen; 
+    filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.5));
+}
+
+#custom-cursor.active {
+    scale: 0.8;
+}
+
+#custom-cursor.hovering {
+    scale: 1.2;
+}
+
+#custom-cursor.hovering img {
+    filter: drop-shadow(0 0 8px var(--accent-blue)) brightness(1.2);
+}
+
+#custom-cursor.cursor-delete img {
+    filter: drop-shadow(0 0 8px #ef4444) sepia(1) saturate(20) hue-rotate(-50deg);
+}
+
+#custom-cursor.cursor-link img {
+    filter: drop-shadow(0 0 8px var(--accent-green));
+}
