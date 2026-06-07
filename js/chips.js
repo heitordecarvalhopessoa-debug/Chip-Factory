@@ -14,7 +14,6 @@ function placeChip(index) {
     const costs = { 'charger': 50, 'giver': 20, 'seller': 30, 'overclock': 80, 'storage': 40, 'splitter': 60, 'miner': 120 };
     const cost = costs[selectedTool];
 
-    // Bloqueia chips bloqueados por nível
     if (selectedTool === 'overclock' && level < 3) return;
     if (selectedTool === 'miner' && level < 4) return;
     if (selectedTool === 'storage' && level < 2) return;
@@ -39,13 +38,12 @@ function createChip(type, index, w, h) {
     const chipId = Date.now() + Math.random();
     const div = document.createElement('div');
     div.className = `chip ${type}`;
-    div.dataset.id = chipId; // Necessário para o sistema de conexões encontrar o chip
+    div.dataset.id = chipId;
     div.style.width = (50 * w + (w - 1) * 2) + 'px';
     div.style.height = (50 * h + (h - 1) * 2) + 'px';
     div.style.left = (coords.x * 52) + 'px';
     div.style.top = (coords.y * 52) + 'px';
 
-    // Define quais portas aparecem em cada chip (Vertical: In=Topo, Out=Base)
     let portsHTML = '';
     if (type === 'charger') portsHTML = '<div class="port out power"></div>';
     if (type === 'giver')   portsHTML = '<div class="port in power"></div><div class="port in speed"></div><div class="port out data"></div>';
@@ -65,7 +63,7 @@ function createChip(type, index, w, h) {
         const btn = document.createElement('button');
         btn.className = 'add-port-btn';
         btn.innerText = '+';
-        btn.title = "Adicionar saída ($20)";
+        btn.title = "Add output ($20)";
         btn.onclick = (e) => {
             e.stopPropagation();
             if (money >= 20) {
@@ -74,7 +72,6 @@ function createChip(type, index, w, h) {
                 newPort.className = 'port out data';
                 div.appendChild(newPort);
                 
-                // Reposiciona portas de saída
                 const outs = div.querySelectorAll('.port.out');
                 outs.forEach((p, i) => {
                     p.style.left = ((i + 1) * 100 / (outs.length + 1)) + '%';
@@ -89,7 +86,7 @@ function createChip(type, index, w, h) {
     div.addEventListener('contextmenu', (e) => showContextMenu(e, chipObj));
 
     div.addEventListener('click', (e) => {
-        if (e.target.classList.contains('port')) return; // Deixa o clique passar para o engine.js se for na porta
+        if (e.target.classList.contains('port')) return;
         e.stopPropagation();
         handleChipClick(chipObj);
     });
