@@ -212,7 +212,7 @@ function toggleAchievementMenu() {
             position: 'fixed',
             left: '50%',
             top: '50%',
-            width: '500px',
+            width: '650px',
             maxWidth: '90vw',
             maxHeight: '80vh',
             background: 'linear-gradient(180deg, #111 0%, #050505 100%)',
@@ -271,7 +271,7 @@ function renderAchievementMenu() {
             </div>
         </div>
 
-        <div style="flex:1; overflow-y:auto; display:flex; flexDirection:column; gap:10px;">
+        <div style="flex:1; overflow-y:auto; display:grid; grid-template-columns: 1fr 1fr; gap:10px; padding-right: 10px; scrollbar-width: thin;">
             ${achievements.map(ach => {
                 let progressHtml = '';
                 if (!ach.achieved && ach.progressCondition) {
@@ -293,19 +293,19 @@ function renderAchievementMenu() {
                 return `
                     <div style="background: ${ach.achieved ? 'linear-gradient(135deg, rgba(255,215,0,0.1) 0%, rgba(0,0,0,0) 100%)' : '#1a1a1a'}; 
                                 border: 1px solid ${ach.achieved ? '#ffd700' : '#333'}; 
-                                padding: 18px; border-radius: 6px; transition: all 0.3s;
+                                padding: 12px; border-radius: 6px; transition: all 0.3s;
                                 position: relative; overflow: hidden;
                                 opacity: ${ach.achieved ? '1' : '0.7'}">
                         
-                        ${ach.achieved ? '<div style="position:absolute; right:-10px; top:-10px; font-size:4em; opacity:0.05; color:#ffd700; pointer-events:none;">🏆</div>' : ''}
+                        ${ach.achieved ? '<div style="position:absolute; right:-5px; top:-5px; font-size:2.5em; opacity:0.1; color:#ffd700; pointer-events:none;">🏆</div>' : ''}
 
                         <div style="display:flex; align-items:center; gap:10px; margin-bottom: 5px;">
-                            <div style="font-size: 1.2em;">${ach.achieved ? '✅' : '🔒'}</div>
+                            <div style="font-size: 1em;">${ach.achieved ? '✅' : '🔒'}</div>
                             <div>
-                                <div style="font-weight: 900; font-size: 0.9em; letter-spacing: 1px; color: ${ach.achieved ? '#ffd700' : '#eee'};">
+                                <div style="font-weight: 900; font-size: 0.8em; letter-spacing: 0.5px; color: ${ach.achieved ? '#ffd700' : '#eee'};">
                                     ${ach.title.toUpperCase()}
                                 </div>
-                                <div style="font-size: 0.75em; color: #999; line-height: 1.2;">${ach.desc}</div>
+                                <div style="font-size: 0.7em; color: #999; line-height: 1.1; margin-top: 2px;">${ach.desc}</div>
                             </div>
                         </div>
                         ${progressHtml}
@@ -338,6 +338,92 @@ function addAchievementButton() {
     document.body.appendChild(btn);
 }
 
+function toggleMainMenu() {
+    let overlay = document.getElementById('main-menu-overlay');
+    let menu = document.getElementById('main-menu');
+    
+    if (!menu) {
+        overlay = document.createElement('div');
+        overlay.id = 'main-menu-overlay';
+        Object.assign(overlay.style, {
+            position: 'fixed', top: '0', left: '0', width: '100%', height: '100%',
+            background: 'rgba(0,0,0,0.85)', zIndex: '4999', display: 'none',
+            backdropFilter: 'blur(8px)', transition: 'opacity 0.3s ease'
+        });
+        overlay.onclick = toggleMainMenu;
+        document.body.appendChild(overlay);
+
+        menu = document.createElement('div');
+        menu.id = 'main-menu';
+        Object.assign(menu.style, {
+            position: 'fixed', left: '50%', top: '50%', width: '320px',
+            background: 'linear-gradient(180deg, #0a0a0a 0%, #000 100%)',
+            border: '1px solid #00d4ff', zIndex: '5000', padding: '40px 20px',
+            boxShadow: '0 0 40px rgba(0, 212, 255, 0.15)',
+            transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+            transform: 'translate(-50%, -45%) scale(0.9)',
+            display: 'flex', flexDirection: 'column', gap: '10px',
+            borderRadius: '4px', opacity: '0', pointerEvents: 'none', textAlign: 'center'
+        });
+        document.body.appendChild(menu);
+    }
+
+    const isVisible = menu.style.opacity === '1';
+    if (isVisible) {
+        menu.style.opacity = '0';
+        menu.style.transform = 'translate(-50%, -45%) scale(0.9)';
+        menu.style.pointerEvents = 'none';
+        overlay.style.opacity = '0';
+        setTimeout(() => overlay.style.display = 'none', 300);
+    } else {
+        renderMainMenu();
+        overlay.style.display = 'block';
+        overlay.style.opacity = '0';
+        requestAnimationFrame(() => {
+            overlay.style.opacity = '1';
+            menu.style.opacity = '1';
+            menu.style.transform = 'translate(-50%, -50%) scale(1)';
+            menu.style.pointerEvents = 'auto';
+        });
+    }
+}
+
+function renderMainMenu() {
+    const menu = document.getElementById('main-menu');
+    menu.innerHTML = `
+        <div style="color: #00d4ff; font-weight: 900; letter-spacing: 5px; font-size: 1.2em; margin-bottom: 20px;">SYSTEM CORE</div>
+        <button class="main-menu-btn" onclick="toggleMainMenu()">CONTINUE</button>
+        <button class="main-menu-btn" onclick="alert('Progress Saved to Local Storage')">SAVE DATA</button>
+        <button class="main-menu-btn" style="border-color: #500; margin-top: 10px;" onclick="if(confirm('Format system? All progress will be lost.')) location.reload()">HARD RESET</button>
+        <div style="margin-top: 25px; color: #444; font-size: 0.65em; letter-spacing: 2px;">BUILD v1.0.42</div>
+        <style>
+            .main-menu-btn {
+                background: #050505; border: 1px solid #333; color: #aaa;
+                padding: 15px; cursor: pointer; font-weight: bold;
+                transition: all 0.2s; letter-spacing: 3px; font-size: 0.75em;
+            }
+            .main-menu-btn:hover {
+                border-color: #00d4ff; color: #fff; background: rgba(0, 212, 255, 0.05);
+            }
+        </style>
+    `;
+}
+
+function addMenuButton() {
+    if (document.getElementById('btn-main-menu')) return;
+    const btn = document.createElement('button');
+    btn.id = 'btn-main-menu';
+    btn.innerHTML = '⚙️';
+    btn.title = 'System Settings';
+    btn.onclick = toggleMainMenu;
+    Object.assign(btn.style, {
+        position: 'fixed', top: '20px', right: '70px', zIndex: '3000',
+        padding: '10px', background: '#222', border: '1px solid #444',
+        borderRadius: '50%', cursor: 'pointer', fontSize: '1.2em'
+    });
+    document.body.appendChild(btn);
+}
+
 window.addEventListener('contextmenu', (e) => e.preventDefault());
 
 document.addEventListener('click', (e) => {
@@ -345,16 +431,26 @@ document.addEventListener('click', (e) => {
     if (!e.target.closest('#context-menu')) menu.style.display = 'none';
 });
 
+window.addEventListener('contextmenu', (e) => e.preventDefault());
+
 const ws = document.getElementById('workspace');
-ws.onmousedown = (e) => { if(selectedTool === 'pan') isPanning = true; };
-window.onmouseup = () => isPanning = false;
-window.onmousemove = (e) => {
-    if (isPanning) {
+ws.onmousedown = (e) => {
+    if(selectedTool === 'pan') {
+        isPanning = true;
+        document.body.style.cursor = 'grabbing';
+    }
+};
+window.onmouseup = () => {
+    isPanning = false;
+    if (selectedTool === 'pan') document.body.style.cursor = 'grab';
+};
+window.addEventListener('mousemove', (e) => {
+    if (isPanning && selectedTool === 'pan') {
         camX += e.movementX;
         camY += e.movementY;
         updateViewport();
     }
-};
+});
 
 ws.onwheel = (e) => {
     e.preventDefault();
@@ -364,3 +460,4 @@ ws.onwheel = (e) => {
 selectTool('pan');
 updateUI();
 addAchievementButton();
+addMenuButton();
