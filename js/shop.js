@@ -1,15 +1,15 @@
 let shopFilter = 'all';
-let shopSort = 'price-asc'; // Padrão: Barato -> Caro
-let shopStatusFilter = 'all'; // Padrão: Todos
+let shopSort = 'price-asc';
+let shopStatusFilter = 'all';
 
 const shopItems = [
-    { id: 'charger', category: 'energia', name: '⚡ Charger', price: 50, desc: 'Fonte de energia base para o sistema.', minLevel: 1, io: { in: [], out: ['⚡ Power'] } },
-    { id: 'giver', category: 'produção', name: '📦 Giver', price: 20, desc: 'Gera 1 dado básico por segundo.', minLevel: 1, io: { in: ['⚡ Power', '🚀 Speed'], out: ['💾 Data'] } },
-    { id: 'seller', category: 'vendas', name: '💰 Seller', price: 30, desc: 'Converte dados e cristais em dinheiro.', minLevel: 1, io: { in: ['💾 Data'], out: ['💵 Cash'] } },
-    { id: 'storage', category: 'logística', name: '📦 Storage', price: 40, desc: 'Acumula dados para processamento posterior.', minLevel: 2, io: { in: ['💾 Data'], out: ['💾 Data'] } },
+    { id: 'charger', category: 'energy', name: '⚡ Charger', price: 50, desc: 'Base power source for the system.', minLevel: 1, io: { in: [], out: ['⚡ Power'] } },
+    { id: 'giver', category: 'production', name: '📦 Giver', price: 20, desc: 'Generates 1 basic data per second.', minLevel: 1, io: { in: ['⚡ Power', '🚀 Speed'], out: ['💾 Data'] } },
+    { id: 'seller', category: 'sales', name: '💰 Seller', price: 30, desc: 'Converts data and crystals into cash.', minLevel: 1, io: { in: ['💾 Data'], out: ['💵 Cash'] } },
+    { id: 'storage', category: 'logistics', name: '📦 Storage', price: 40, desc: 'Accumulates data for later processing.', minLevel: 2, io: { in: ['💾 Data'], out: ['💾 Data'] } },
     { id: 'overclock', category: 'upgrade', name: '🚀 Overclock', price: 80, desc: 'Acelera a produção de chips adjacentes.', minLevel: 3, io: { in: ['⚡ Power'], out: ['🚀 Speed'] } },
-    { id: 'splitter', category: 'logística', name: '🌿 Splitter', price: 60, desc: 'Divide um fluxo de dados em múltiplas saídas.', minLevel: 2, io: { in: ['💾 Data'], out: ['💾 Data (x2)'] } },
-    { id: 'miner', category: 'produção', name: '⛏️ Miner', price: 120, desc: 'Extrai Cripto valiosa ($10/u). Alta demanda.', minLevel: 4, io: { in: ['⚡ Power', '🚀 Speed'], out: ['💎 Crypto'] } }
+    { id: 'splitter', category: 'logistics', name: '🌿 Splitter', price: 60, desc: 'Divides a data stream into multiple outputs.', minLevel: 2, io: { in: ['💾 Data'], out: ['💾 Data (x2)'] } },
+    { id: 'miner', category: 'production', name: '⛏️ Miner', price: 120, desc: 'Extracts valuable Crypto ($10/u). High demand.', minLevel: 4, io: { in: ['⚡ Power', '🚀 Speed'], out: ['💎 Crypto'] } }
 ];
 
 function setShopFilter(filter) {
@@ -34,7 +34,6 @@ function renderShop() {
     const container = document.getElementById('shop-items-container');
     if (!container) return;
 
-    // Criar cabeçalho de filtros se não existir
     let controls = document.getElementById('shop-controls');
     if (!controls) {
         controls = document.createElement('div');
@@ -43,20 +42,19 @@ function renderShop() {
         
         controls.innerHTML = `
             <div class="filter-row" style="display: flex; gap: 5px; flex-wrap: wrap;">
-                <button class="filter-btn small ${shopStatusFilter==='all'?'active':''}" onclick="setStatusFilter('all')">Todos</button>
-                <button class="filter-btn small ${shopStatusFilter==='unlocked'?'active':''}" onclick="setStatusFilter('unlocked')">🔓 Liberados</button>
-                <button class="filter-btn small ${shopStatusFilter==='locked'?'active':''}" onclick="setStatusFilter('locked')">🔒 Bloqueados</button>
+                <button class="filter-btn small ${shopStatusFilter==='all'?'active':''}" onclick="setStatusFilter('all')">All</button>
+                <button class="filter-btn small ${shopStatusFilter==='unlocked'?'active':''}" onclick="setStatusFilter('unlocked')">🔓 Unlocked</button>
+                <button class="filter-btn small ${shopStatusFilter==='locked'?'active':''}" onclick="setStatusFilter('locked')">🔒 Locked</button>
             </div>
             <select onchange="setShopSort(this.value)" style="background: #222; color: white; border: 1px solid #444; padding: 5px; border-radius: 4px; cursor: pointer;">
-                <option value="price-asc" ${shopSort==='price-asc'?'selected':''}>💰 Menor Preço</option>
-                <option value="price-desc" ${shopSort==='price-desc'?'selected':''}>💎 Maior Preço</option>
-                <option value="level" ${shopSort==='level'?'selected':''}>📈 Nível Tecnológico</option>
+                <option value="price-asc" ${shopSort==='price-asc'?'selected':''}>💰 Lowest Price</option>
+                <option value="price-desc" ${shopSort==='price-desc'?'selected':''}>💎 Highest Price</option>
+                <option value="level" ${shopSort==='level'?'selected':''}>📈 Tech Level</option>
             </select>
         `;
         container.parentElement.insertBefore(controls, container);
     }
 
-    // Estilização do Container de Itens (Scrollbar Customizada via CSS seria melhor, mas mantemos JS)
     Object.assign(container.style, {
         maxHeight: "65vh",
         overflowY: "auto",
@@ -70,19 +68,16 @@ function renderShop() {
 
     let items = [...shopItems];
 
-    // Filtros
     if (shopFilter !== 'all') {
         items = items.filter(i => i.category === shopFilter);
     }
 
-    // Filtro de Status (Desbloqueados/Bloqueados)
     if (shopStatusFilter === 'unlocked') {
         items = items.filter(i => i.minLevel <= level);
     } else if (shopStatusFilter === 'locked') {
         items = items.filter(i => i.minLevel > level);
     }
 
-    // Ordenação Dinâmica
     items.sort((a, b) => {
         if (shopSort === 'price-asc') return a.price - b.price;
         if (shopSort === 'price-desc') return b.price - a.price;
@@ -95,7 +90,6 @@ function renderShop() {
         const isLocked = item.minLevel > level;
         const canAfford = money >= item.price;
         const div = document.createElement('div');
-        // Adiciona classe visual se não tiver dinheiro suficiente
         div.className = `shop-item ${isLocked ? 'locked' : ''} ${!canAfford && !isLocked ? 'insufficient-funds' : ''} ${selectedTool === item.id ? 'active' : ''}`;
         div.id = `btn-${item.id}`;
         div.onclick = () => selectTool(item.id);
@@ -108,11 +102,11 @@ function renderShop() {
             <div class="name" style="font-size: 1.1em; font-weight: bold; margin: 4px 0;">${item.name}</div>
             <div class="desc" style="font-size: 0.85em; margin-bottom: 8px;">${item.desc}</div>
             <div class="item-specs" style="font-size: 0.75em; background: rgba(0,0,0,0.2); padding: 4px; border-radius: 4px; margin-bottom: 8px;">
-                <div><strong>Entrada:</strong> ${item.io.in.length > 0 ? item.io.in.join(', ') : 'Nenhuma'}</div>
-                <div><strong>Saída:</strong> ${item.io.out.join(', ')}</div>
+                <div><strong>Input:</strong> ${item.io.in.length > 0 ? item.io.in.join(', ') : 'None'}</div>
+                <div><strong>Output:</strong> ${item.io.out.join(', ')}</div>
             </div>
             <div class="item-footer" style="font-size: 0.75em; border-top: 1px solid #444; pt-4 mt-2">
-                ${isLocked ? `<span style="color:#e74c3c">🔒 Nível ${item.minLevel}</span>` : `<span style="color:#2ecc71">✅ Desbloqueado</span>`}
+                ${isLocked ? `<span style="color:#e74c3c">🔒 Level ${item.minLevel}</span>` : `<span style="color:#2ecc71">✅ Unlocked</span>`}
                 <span style="float:right">📏 4x4</span>
             </div>
         `;
