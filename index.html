@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chip Factory</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <div id="hud">
+        <div class="stat-item">
+            <span class="stat-icon">💰</span>
+            <span id="money">0</span>
+        </div>
+        
+        <div class="stat-item">
+            <span id="level-tag">LVL <span id="level">1</span></span>
+            <div class="xp-group">
+                <div class="xp-bar-bg"><div id="xp-bar-fill"></div></div>
+                <span style="font-size: 10px; color: #94a3b8; text-align: center; font-weight: 500; letter-spacing: 0.5px;">
+                    <span id="xp">0</span> / <span id="xp-target">0</span> <span style="opacity: 0.6">XP</span>
+                </span>
+            </div>
+        </div>
+
+        <div class="stat-item">
+            <span class="stat-icon">📦</span>
+            <span id="data-count">0</span>
+        </div>
+    </div>
+
+    <div id="main-container">
+        <div id="shop">
+            <h2>Hardware Shop</h2>
+
+            <div id="shop-items-container"></div>
+        </div>
+
+        <div id="workspace">
+            <div id="viewport">
+                <svg id="connections-layer"></svg>
+                <div id="grid"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="utility-bar">
+        <div class="tool-item" id="btn-pan" title="Mover Workspace" onclick="selectTool('pan')">🖐️</div>
+        <div class="tool-item" id="btn-link" title="Conectar Chips" onclick="selectTool('link')">🔗</div>
+        <div class="tool-item" id="btn-move" title="Mover Chip" onclick="selectTool('move')">🏗️</div>
+        <div class="tool-item" title="Zoom In" onclick="changeZoom(0.1)">➕</div>
+        <div class="tool-item" title="Zoom Out" onclick="changeZoom(-0.1)">➖</div>
+    </div>
+
+    <div id="context-menu" class="context-menu">
+        <div class="context-menu-item" id="menu-move">🏗️ Mover Chip</div>
+        <div class="context-menu-item delete" id="menu-delete">🗑️ Deletar</div>
+    </div>
+
+    <script src="js/state.js"></script>
+    <script src="js/shop.js"></script>
+    <script src="js/connections.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/chips.js"></script>
+    <script src="js/grid.js"></script>
+    <script src="js/engine.js"></script>
+</body>
+</html>
