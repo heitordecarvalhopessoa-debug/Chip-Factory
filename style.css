@@ -1,0 +1,288 @@
+:root {
+    --bg-dark: #0f172a;
+    --accent-blue: #3b82f6;
+    --accent-green: #22c55e;
+    --accent-gold: #fbbf24;
+    --panel-bg: rgba(30, 41, 59, 0.9);
+}
+
+body { 
+    font-family: 'Inter', system-ui, sans-serif; 
+    background-color: var(--bg-dark); 
+    color: #f8fafc; 
+    margin: 0; 
+    height: 100vh; 
+    display: flex; 
+    flex-direction: column; 
+    overflow: hidden;
+    user-select: none;
+}
+
+#hud { 
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex; 
+    align-items: center; 
+    gap: 30px;
+    padding: 12px 30px;
+    background: var(--panel-bg);
+    border: 1px solid #334155;
+    border-radius: 100px;
+    backdrop-filter: blur(10px);
+    z-index: 1000;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+}
+
+.stat-item { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 14px; }
+.stat-label { font-size: 12px; color: #888; text-transform: uppercase; display: block; }
+#money { color: var(--accent-green); font-family: monospace; font-size: 16px; }
+#data-count { color: #0077ff; }
+
+#main-container { display: flex; flex: 1; overflow: hidden; }
+
+#workspace { 
+    flex: 1; 
+    background-color: #020617;
+    background-image: 
+        linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+    background-size: 52px 52px; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    position: relative; 
+    overflow: hidden; 
+    cursor: grab;
+}
+
+#viewport {
+    transform-origin: 0 0;
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+#grid { 
+    display: grid; 
+    grid-template-columns: repeat(100, 50px); 
+    grid-template-rows: repeat(100, 50px); 
+    gap: 2px; 
+    background: #333; 
+    border: 5px solid #444;
+    position: relative;
+}
+.cell { width: 50px; height: 50px; background: #222; border: 1px solid #333; box-sizing: border-box; }
+.cell.hover { background: #444; }
+
+#shop { 
+    width: 280px; 
+    background: #1e293b; 
+    border-right: 1px solid #334155; 
+    padding: 24px; 
+    display: flex; 
+    flex-direction: column; 
+    gap: 15px;
+    z-index: 10;
+}
+#shop h2 { margin-top: 0; color: #00ffcc; font-size: 18px; border-bottom: 1px solid #333; padding-bottom: 10px; }
+
+#shop-filters {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+}
+.filter-btn {
+    background: #334155;
+    border: 1px solid #475569;
+    color: #94a3b8;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 11px;
+    text-transform: uppercase;
+    transition: all 0.2s;
+}
+.filter-btn:hover { background: #475569; color: #f8fafc; }
+.filter-btn.active {
+    background: var(--accent-blue);
+    color: white;
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.4);
+}
+
+.shop-item, .tool-item {
+    background: #334155;
+    border: 1px solid #475569;
+    padding: 16px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+}
+.shop-item:hover, .tool-item:hover { background: #383838; border-color: #00ffcc; }
+.shop-item.active, .tool-item.active { border-color: #00ffcc; background: #1a3a35; box-shadow: 0 0 10px rgba(0,255,204,0.2); }
+.shop-item .name { display: block; font-weight: bold; margin-bottom: 4px; }
+.shop-item .price { color: var(--accent-gold); font-weight: 700; font-size: 14px; }
+.shop-item .desc { font-size: 11px; color: #888; display: block; margin-top: 4px; }
+
+.shop-item.locked {
+    opacity: 0.5;
+    filter: grayscale(1);
+    cursor: not-allowed;
+    pointer-events: none;
+}
+.shop-item.locked::after {
+    content: '🔒';
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 1.2rem;
+}
+
+#utility-bar {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 1000;
+}
+.tool-item {
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    padding: 0;
+}
+
+#connections-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 5;
+}
+
+.chip { 
+    position: absolute; 
+    border-radius: 10px; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    justify-content: center; 
+    font-weight: 900; 
+    font-size: 12px; 
+    cursor: pointer; 
+    text-align: center; 
+    pointer-events: auto; 
+    transition: all 0.3s; 
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5), inset 0 0 10px rgba(255,255,255,0.1);
+    border: 2px solid rgba(255,255,255,0.1);
+}
+.charger { background: linear-gradient(135deg, #1e3a8a, #3b82f6); z-index: 2; }
+.giver { background: linear-gradient(135deg, #334155, #64748b); z-index: 1; }
+.seller { background: linear-gradient(135deg, #064e3b, #10b981); z-index: 1; }
+.overclock { background: linear-gradient(135deg, #7c2d12, #f59e0b); }
+.storage { background: linear-gradient(135deg, #4c1d95, #8b5cf6); }
+.splitter { background: linear-gradient(135deg, #0f766e, #2dd4bf); }
+.miner { background: linear-gradient(135deg, #451a03, #92400e); }
+
+.chip.selected { outline: 3px solid #00ffcc; outline-offset: 4px; z-index: 10; }
+.chip.active-flow { 
+    filter: brightness(1.2);
+    transform: scale(1.05);
+    border-color: rgba(255, 255, 255, 0.5);
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+}
+
+.port {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    cursor: crosshair;
+    z-index: 100;
+    transition: transform 0.2s;
+    box-sizing: border-box;
+}
+.port:hover { transform: translateX(-50%) scale(1.4) !important; border-color: #fff; }
+
+.port.power { background: var(--accent-blue); box-shadow: 0 0 10px var(--accent-blue); }
+.port.data { background: var(--accent-green); box-shadow: 0 0 10px var(--accent-green); }
+.port.speed { background: var(--accent-gold); box-shadow: 0 0 10px var(--accent-gold); }
+
+.port.in { top: -5px; left: 50%; transform: translateX(-50%); }
+.port.out { bottom: -5px; left: 50%; transform: translateX(-50%); }
+
+.chip.giver .port.in.power { left: 30%; }
+.chip.giver .port.in.speed { left: 70%; }
+
+.add-port-btn {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    width: 16px;
+    height: 16px;
+    background: rgba(255,255,255,0.2);
+    border: none;
+    border-radius: 4px;
+    color: white;
+    font-size: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 5px; }
+.on { background: #00ff00; box-shadow: 0 0 5px #00ff00; }
+.off { background: #ff0000; }
+
+.xp-group { display: flex; flex-direction: column; width: 120px; gap: 4px; }
+.xp-bar-bg { height: 6px; border-radius: 3px; background: #1e293b; overflow: hidden; }
+#xp-bar-fill { height: 100%; background: var(--accent-blue); transition: width 0.3s ease; }
+#level-tag { background: var(--accent-blue); padding: 2px 8px; border-radius: 4px; font-size: 10px; text-transform: uppercase; }
+
+.connection-path {
+    stroke-dasharray: 8;
+    animation: flow 1s linear infinite;
+}
+
+@keyframes flow {
+    from { stroke-dashoffset: 16; }
+    to { stroke-dashoffset: 0; }
+}
+
+.context-menu {
+    position: fixed;
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    padding: 5px 0;
+    z-index: 2000;
+    display: none;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+    min-width: 150px;
+}
+.context-menu-item {
+    padding: 10px 16px;
+    cursor: pointer;
+    font-size: 13px;
+    color: #f8fafc;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background 0.2s;
+}
+.context-menu-item:hover { background: #334155; color: var(--accent-blue); }
+.context-menu-item.delete:hover { background: #450a0a; color: #f87171; }
