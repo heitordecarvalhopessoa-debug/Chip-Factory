@@ -16,16 +16,16 @@ function handleChipClick(chip) {
 }
 
 function createLink(source, target) {
-    const valid = (source.type === 'charger' && (target.type === 'giver' || target.type === 'overclock' || target.type === 'miner')) ||
+    const valid = (source.type === 'charger' && (target.type === 'giver' || target.type === 'battery')) ||
+                  (source.type === 'battery' && (target.type === 'miner' || target.type === 'overclock')) ||
                   (source.type === 'giver' && (target.type === 'seller' || target.type === 'storage' || target.type === 'splitter')) ||
                   (source.type === 'miner' && (target.type === 'seller' || target.type === 'storage' || target.type === 'splitter')) ||
                   (source.type === 'storage' && (target.type === 'seller' || target.type === 'splitter')) ||
                   (source.type === 'splitter' && (target.type === 'seller' || target.type === 'storage' || target.type === 'splitter')) ||
                   (source.type === 'overclock' && (target.type === 'giver' || target.type === 'miner'));
     
-    if (valid) {
-        if (!connections.find(c => c.from === source && c.to === target)) {
-            // Encontra portas padrão para manter compatibilidade com o sistema de renderização por porta
+    if (valid && !connections.find(c => c.from === source && c.to === target)) {
+            
             const fromPort = source.element.querySelector('.port.out');
             const toPort = target.element.querySelector('.port.in');
             
@@ -33,6 +33,7 @@ function createLink(source, target) {
                 let type = 'data';
                 if (fromPort.classList.contains('power')) type = 'power';
                 if (fromPort.classList.contains('speed')) type = 'speed';
+                if (fromPort.classList.contains('energy')) type = 'energy';
 
                 connections.push({ 
                     from: source, 
@@ -45,9 +46,7 @@ function createLink(source, target) {
             }
         }
     }
-}
 
-// Gerenciamento de Cliques em Portas
 document.addEventListener('click', (e) => {
     if (selectedTool !== 'link') return;
     
@@ -62,16 +61,17 @@ document.addEventListener('click', (e) => {
     let type = 'data';
     if (port.classList.contains('power')) type = 'power';
     if (port.classList.contains('speed')) type = 'speed';
+    if (port.classList.contains('energy')) type = 'energy';
 
 
     if (!pendingPort) {
-        // Só começa a conexão se for uma porta de saída
+        
         if (isOut) {
             pendingPort = { chip, type, element: port };
             port.style.outline = "2px solid white";
         }
     } else {
-        // Finaliza a conexão se for uma porta de entrada do mesmo tipo e chip diferente
+        
         if (!isOut && type === pendingPort.type && chip !== pendingPort.chip) {
             connections.push({
                 from: pendingPort.chip,
@@ -92,7 +92,6 @@ function renderConnections() {
     layer.innerHTML = '';
     const gridRect = gridElement.getBoundingClientRect();
     
-    // Desenha conexões salvas
     connections.forEach(conn => {
         const startRect = conn.fromPort.getBoundingClientRect();
         const endRect = conn.toPort.getBoundingClientRect();
@@ -105,7 +104,6 @@ function renderConnections() {
         drawPath(x1, y1, x2, y2, conn.type, false, conn.from.type, conn.to.type, conn);
     });
 
-    // Desenha o fio temporário (Rubber Band)
     if (pendingPort) {
         const startRect = pendingPort.element.getBoundingClientRect();
         const x1 = (startRect.left - gridRect.left + startRect.width / 2) / zoom;
@@ -119,27 +117,26 @@ function drawPath(x1, y1, x2, y2, type, isPending, fromType, toType, connRef) {
         const layer = document.getElementById('connections-layer');
         const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
 
-        // Roteamento Manhattan (H-V-H) para manter os pontos de quebra nas verticais
         const midX = x1 + (x2 - x1) / 2;
         const d = `M ${x1} ${y1} L ${midX} ${y1} L ${midX} ${y2} L ${x2} ${y2}`;
 
-        // Cores baseadas no que está sendo conectado (Lógica de Fluxo)
         let color = type === 'power' ? '#00d4ff' : '#00ff88';
 
-        if (type === 'speed') color = '#ffff00'; // Amarelo para Overclock
+        if (type === 'speed') color = '#ffff00';
+        if (type === 'energy') color = '#ff4444';
         
         if (fromType === 'giver' && toType === 'seller') {
-            color = '#ffcc00'; // Dourado para fluxo de venda/dinheiro
+            color = '#ffcc00';
         } else if (fromType === 'charger') {
-            color = '#00d4ff'; // Ciano vibrante para energia pura
+            color = '#00d4ff';
         } else if (fromType === 'giver' && toType === 'giver') {
-            color = '#00ff88'; // Verde neon para transferência de dados
-        } else if (fromType === 'miner') { // Nova cor para fluxo de cripto
-            color = '#fbbf24'; // Dourado para cripto
+            color = '#00ff88';
+        } else if (fromType === 'miner') {
+            color = '#fbbf24';
         } else if (toType === 'storage' || fromType === 'storage') {
-            color = '#a855f7'; // Roxo para fluxo de armazenamento
+            color = '#a855f7';
         } else if (fromType === 'splitter' || toType === 'splitter') {
-            color = '#2dd4bf'; // Teal para o divisor
+            color = '#2dd4bf';
         }
 
         path.setAttribute("d", d);
