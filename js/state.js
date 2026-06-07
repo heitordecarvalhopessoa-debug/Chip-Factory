@@ -13,34 +13,33 @@ const gridSize = 100;
 let chips = [];
 let connections = [];
 
-// Definição das conquistas com condições de progresso
 let achievements = [
     { 
         id: 'first_rich', 
-        title: 'Capitalista', 
-        desc: 'Acumule $1,000 em caixa.', 
+        title: 'Capitalist', 
+        desc: 'Accumulate $1,000 in cash.', 
         condition: () => money >= 1000, 
         progressCondition: () => ({ current: money, target: 1000 }), 
         achieved: false 
     },
     { 
         id: 'data_master', 
-        title: 'Mestre dos Dados', 
-        desc: 'Tenha 100 dados processando no sistema.', 
+        title: 'Data Master', 
+        desc: 'Have 100 data units processing in the system.', 
         condition: () => chips.reduce((a, c) => a + (c.data || 0), 0) >= 100, 
         progressCondition: () => ({ current: chips.reduce((a, c) => a + (c.data || 0), 0), target: 100 }), 
         achieved: false 
     },
-    { id: 'level_5', title: 'Engenheiro Sênior', desc: 'Alcance o nível 5.', condition: () => level >= 5, progressCondition: () => ({ current: level, target: 5 }), achieved: false },
+    { id: 'level_5', title: 'Senior Engineer', desc: 'Reach level 5.', condition: () => level >= 5, progressCondition: () => ({ current: level, target: 5 }), achieved: false },
     { 
         id: 'mass_prod', 
-        title: 'Produção em Massa', 
-        desc: 'Construa 15 chips na sua fábrica.', 
+        title: 'Mass Production', 
+        desc: 'Build 15 chips in your factory.', 
         condition: () => chips.length >= 15, 
         progressCondition: () => ({ current: chips.length, target: 15 }), 
         achieved: false 
     },
-    { id: 'overclock_king', title: 'Veloz e Furioso', desc: 'Tenha um chip operando em Overclock.', condition: () => chips.some(c => c.overclocked), progressCondition: null, achieved: false } // Conquista booleana, sem barra de progresso
+    { id: 'overclock_king', title: 'Fast & Furious', desc: 'Have a chip operating in Overclock.', condition: () => chips.some(c => c.overclocked), progressCondition: null, achieved: false }
 ];
 
 const gridElement = document.getElementById('grid');
@@ -55,7 +54,6 @@ function selectTool(tool) {
     });
     document.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
     
-    // Atualiza a loja para marcar o item selecionado
     if (typeof renderShop === 'function') renderShop();
 }
 
