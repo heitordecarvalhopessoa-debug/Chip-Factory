@@ -4,7 +4,6 @@ let lastMoney = money;
 let lastTotalData = 0;
 let moneyFlashTimeout = null;
 
-// Rastrear mouse para o efeito de Rubber Banding
 window.addEventListener('mousemove', (e) => {
     const rect = gridElement.getBoundingClientRect();
     mouseX = (e.clientX - rect.left) / zoom;
@@ -22,7 +21,6 @@ function showContextMenu(e, chip) {
     menu.style.top = e.clientY + 'px';
 }
 
-// Inicialização dos itens do menu de contexto
 document.getElementById('menu-move').onclick = () => {
     if (activeMenuChip) {
         selectTool('move');
@@ -45,7 +43,6 @@ function updateUI() {
     const dataEl = document.getElementById('data-count');
     const barFill = document.getElementById('xp-bar-fill');
 
-    // Feedback visual para ganho de dinheiro (Pulso e Cor)
     if (money > lastMoney) {
         moneyEl.style.color = "#00ff88";
         moneyEl.style.transform = "scale(1.1)";
@@ -58,7 +55,6 @@ function updateUI() {
     }
     lastMoney = money;
 
-    // Atualização dos valores básicos com prefixo de moeda
     moneyEl.innerText = `$${new Intl.NumberFormat('en-US').format(money)}`;
     document.getElementById('level').innerText = level;
     document.getElementById('xp').innerText = xp;
@@ -98,14 +94,14 @@ function showFloatingText(parent, text, color) {
     const rect = parent.getBoundingClientRect();
     const gridRect = gridElement.getBoundingClientRect();
     
-    const spread = (Math.random() - 0.5) * 40; // Evita que múltiplos textos fiquem sobrepostos
+    const spread = (Math.random() - 0.5) * 40;
     el.style.left = (rect.left - gridRect.left + rect.width / 2) / zoom + spread + 'px';
     el.style.top = (rect.top - gridRect.top - 20) / zoom + 'px';
     
     gridElement.appendChild(el);
     
     requestAnimationFrame(() => {
-        const tilt = (Math.random() - 0.5) * 20; // Pequena inclinação aleatória
+        const tilt = (Math.random() - 0.5) * 20;
         el.style.transform = `translateY(-60px) scale(1.4) rotate(${tilt}deg)`;
         el.style.opacity = '0';
     });
@@ -119,7 +115,7 @@ function showLevelUpNotification(newLevel, unlockedItems) {
     if (unlockedItems.length > 0) {
         unlocksHtml = `
             <div style="margin-top: 15px; font-size: 0.9em; opacity: 0.9; color: #eee; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px;">
-                <div style="margin-bottom: 5px; color: #aaa; font-size: 0.8em; letter-spacing: 1px;">NOVAS TECNOLOGIAS DESBLOQUEADAS:</div>
+                <div style="margin-bottom: 5px; color: #aaa; font-size: 0.8em; letter-spacing: 1px;">NEW TECHNOLOGIES UNLOCKED:</div>
                 ${unlockedItems.map(item => `<span style="color: #00ff88; font-weight: bold;">${item.name}</span>`).join(' • ')}
             </div>
         `;
@@ -127,9 +123,9 @@ function showLevelUpNotification(newLevel, unlockedItems) {
 
     notification.innerHTML = `
         <div style="font-size: 2.2em; font-weight: 900; color: #ff00ff; text-shadow: 0 0 15px rgba(255,0,255,0.6); letter-spacing: 4px;">
-            NÍVEL ${newLevel}
+            LEVEL ${newLevel}
         </div>
-        <div style="font-size: 0.8em; color: #00d4ff; font-weight: bold; margin-top: 5px; letter-spacing: 2px;">SISTEMA ATUALIZADO</div>
+        <div style="font-size: 0.8em; color: #00d4ff; font-weight: bold; margin-top: 5px; letter-spacing: 2px;">SYSTEM UPDATED</div>
         ${unlocksHtml}
     `;
 
@@ -152,13 +148,11 @@ function showLevelUpNotification(newLevel, unlockedItems) {
 
     document.body.appendChild(notification);
 
-    // Animação de entrada
     requestAnimationFrame(() => {
         notification.style.opacity = '1';
         notification.style.transform = 'translate(-50%, -50%) scale(1)';
     });
 
-    // Remove após 3.5 segundos com animação de saída
     setTimeout(() => {
         notification.style.opacity = '0';
         notification.style.transform = 'translate(-50%, -50%) scale(1.1)';
@@ -169,7 +163,7 @@ function showLevelUpNotification(newLevel, unlockedItems) {
 function showAchievementNotification(ach) {
     const notification = document.createElement('div');
     notification.innerHTML = `
-        <div style="color: #ffd700; font-size: 0.7em; font-weight: bold; letter-spacing: 2px; margin-bottom: 5px;">🏆 CONQUISTA DESBLOQUEADA</div>
+        <div style="color: #ffd700; font-size: 0.7em; font-weight: bold; letter-spacing: 2px; margin-bottom: 5px;">🏆 ACHIEVEMENT UNLOCKED</div>
         <div style="font-size: 1.4em; font-weight: 900; color: white;">${ach.title}</div>
         <div style="font-size: 0.85em; color: #aaa; margin-top: 5px;">${ach.desc}</div>
     `;
@@ -202,7 +196,6 @@ function toggleAchievementMenu() {
     let menu = document.getElementById('achievement-menu');
     
     if (!menu) {
-        // Cria o fundo escurecido (Backdrop)
         overlay = document.createElement('div');
         overlay.id = 'achievement-overlay';
         Object.assign(overlay.style, {
@@ -262,18 +255,17 @@ function renderAchievementMenu() {
     const menu = document.getElementById('achievement-menu');
     if (!menu) return;
 
-    // Calcula estatísticas gerais
     const total = achievements.length;
     const completed = achievements.filter(a => a.achieved).length;
 
     menu.innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px;">
-            <h2 style="margin:0; font-size: 1.6em; color: #ffd700; text-shadow: 0 0 15px rgba(255,215,0,0.4); letter-spacing: 2px;">ARQUIVO DE MÉRITO</h2>
+            <h2 style="margin:0; font-size: 1.6em; color: #ffd700; text-shadow: 0 0 15px rgba(255,215,0,0.4); letter-spacing: 2px;">MERIT ARCHIVE</h2>
             <button onclick="toggleAchievementMenu()" style="background:none; border:none; color:#555; cursor:pointer; font-size: 1.8em; transition:color 0.2s;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#555'">&times;</button>
         </div>
         
         <div style="margin-bottom: 25px; font-size: 0.85em; color: #888; border-bottom: 1px solid #333; padding-bottom: 20px;">
-            STATUS DA CARREIRA: <span style="color:#ffd700; font-weight:bold;">${completed} / ${total} COMPLETADOS</span>
+            CAREER STATUS: <span style="color:#ffd700; font-weight:bold;">${completed} / ${total} COMPLETED</span>
             <div style="width:100%; height:4px; background:#222; margin-top:8px; border-radius:2px; overflow:hidden;">
                 <div style="width:${(completed/total)*100}%; height:100%; background:#ffd700; box-shadow: 0 0 10px #ffd700;"></div>
             </div>
@@ -288,7 +280,7 @@ function renderAchievementMenu() {
                     progressHtml = `
                         <div style="margin-top: 10px;">
                             <div style="display:flex; justify-content:space-between; font-size: 0.7em; color: #666; margin-bottom: 4px;">
-                                <span>PROGRESSO</span>
+                                <span>PROGRESS</span>
                                 <span>${percent}%</span>
                             </div>
                             <div style="width:100%; height:3px; background:#111; border-radius:2px; overflow:hidden;">
@@ -324,13 +316,12 @@ function renderAchievementMenu() {
     `;
 }
 
-// Adiciona o botão de conquistas na HUD se ele não existir
 function addAchievementButton() {
     if (document.getElementById('btn-achievements')) return;
     const btn = document.createElement('button');
     btn.id = 'btn-achievements';
     btn.innerHTML = '🏆';
-    btn.title = 'Conquistas';
+    btn.title = 'Achievements';
     btn.onclick = toggleAchievementMenu;
     Object.assign(btn.style, {
         position: 'fixed',
@@ -347,7 +338,6 @@ function addAchievementButton() {
     document.body.appendChild(btn);
 }
 
-// Eventos globais e inicialização
 window.addEventListener('contextmenu', (e) => e.preventDefault());
 
 document.addEventListener('click', (e) => {
@@ -371,7 +361,6 @@ ws.onwheel = (e) => {
     changeZoom(e.deltaY > 0 ? -0.1 : 0.1);
 };
 
-// Estado Inicial
 selectTool('pan');
 updateUI();
 addAchievementButton();
