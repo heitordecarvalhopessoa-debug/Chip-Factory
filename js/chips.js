@@ -43,6 +43,15 @@ function createChip(type, index, w, h) {
     div.style.height = (50 * h + (h - 1) * 2) + 'px';
     div.style.left = (coords.x * 52) + 'px';
     div.style.top = (coords.y * 52) + 'px';
+    div.style.backgroundImage = "url('assets/imgs/chip.png')";
+    div.style.backgroundSize = "100% 100%";
+    div.style.display = "flex";
+    div.style.flexDirection = "column";
+    div.style.alignItems = "center";
+    div.style.justifyContent = "center";
+    div.style.textAlign = "center";
+    div.style.color = "white";
+    div.style.textShadow = "1px 1px 3px rgba(0,0,0,0.8)";
 
     let portsHTML = '';
     if (type === 'charger') portsHTML = '<div class="port out power"></div>';
@@ -57,7 +66,7 @@ function createChip(type, index, w, h) {
                     '<div class="port out data" style="left: 70%"></div>';
     }
 
-    div.innerHTML = `${portsHTML}${type.toUpperCase()}<br><span class="status"></span>`;
+    div.innerHTML = `${portsHTML}<div style="pointer-events:none; z-index:1;">${type.toUpperCase()}<br><span class="status"></span></div>`;
 
     if (type === 'splitter') {
         const btn = document.createElement('button');
