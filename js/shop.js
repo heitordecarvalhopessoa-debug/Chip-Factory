@@ -6,6 +6,7 @@ const shopItems = [
     { id: 'charger', category: 'energy', name: '⚡ Charger', price: 50, desc: 'Base power source for the system.', minLevel: 1, io: { in: [], out: ['⚡ Power'] } },
     { id: 'giver', category: 'production', name: '📦 Giver', price: 20, desc: 'Generates 1 basic data per second.', minLevel: 1, io: { in: ['⚡ Power', '🚀 Speed'], out: ['💾 Data'] } },
     { id: 'seller', category: 'sales', name: '💰 Seller', price: 30, desc: 'Converts data and crystals into cash.', minLevel: 1, io: { in: ['💾 Data'], out: ['💵 Cash'] } },
+    { id: 'battery', category: 'energy', name: '🔋 Battery', price: 60, desc: 'Required to power Miners. Stores energy.', minLevel: 2, io: { in: ['⚡ Power'], out: ['🔋 Energy'] } },
     { id: 'storage', category: 'logistics', name: '📦 Storage', price: 40, desc: 'Accumulates data for later processing.', minLevel: 2, io: { in: ['💾 Data'], out: ['💾 Data'] } },
     { id: 'overclock', category: 'upgrade', name: '🚀 Overclock', price: 80, desc: 'Acelera a produção de chips adjacentes.', minLevel: 3, io: { in: ['⚡ Power'], out: ['🚀 Speed'] } },
     { id: 'splitter', category: 'logistics', name: '🌿 Splitter', price: 60, desc: 'Divides a data stream into multiple outputs.', minLevel: 2, io: { in: ['💾 Data'], out: ['💾 Data (x2)'] } },
@@ -79,10 +80,17 @@ function renderShop() {
     }
 
     items.sort((a, b) => {
-        if (shopSort === 'price-asc') return a.price - b.price;
-        if (shopSort === 'price-desc') return b.price - a.price;
-        if (shopSort === 'level') return a.minLevel - b.minLevel;
-        return 0;
+        const aLocked = a.minLevel > level;
+        const bLocked = b.minLevel > level;
+
+        
+        if (aLocked !== bLocked) return aLocked ? 1 : -1;
+
+        
+        if (a.minLevel !== b.minLevel) return a.minLevel - b.minLevel;
+
+        
+        return a.price - b.price;
     });
 
     container.innerHTML = '';
