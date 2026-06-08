@@ -186,14 +186,6 @@ body {
     box-shadow: 0 4px 10px rgba(0,0,0,0.5), inset 0 0 10px rgba(255,255,255,0.1);
     border: 2px solid rgba(255,255,255,0.1);
 }
-.charger { background: linear-gradient(135deg, #1e3a8a, #3b82f6); z-index: 2; }
-.giver { background: linear-gradient(135deg, #334155, #64748b); z-index: 1; }
-.seller { background: linear-gradient(135deg, #064e3b, #10b981); z-index: 1; }
-.overclock { background: linear-gradient(135deg, #7c2d12, #f59e0b); }
-.battery { background: linear-gradient(135deg, #1e293b, #0f172a); border: 2px solid #facc15 !important; }
-.storage { background: linear-gradient(135deg, #4c1d95, #8b5cf6); }
-.splitter { background: linear-gradient(135deg, #0f766e, #2dd4bf); }
-.miner { background: linear-gradient(135deg, #451a03, #92400e); }
 
 .chip.selected { outline: 3px solid #00ffcc; outline-offset: 4px; z-index: 10; }
 .chip.active-flow { 
@@ -240,6 +232,7 @@ body {
     transition: width 0.3s ease;
     box-shadow: 0 0 10px rgba(255, 68, 68, 0.5);
 }
+
 .chip.giver .port.in.power { left: 30%; }
 .chip.giver .port.in.speed { left: 70%; }
 .chip.miner .port.in.energy { left: 30%; }
@@ -346,4 +339,16 @@ body {
 
 #custom-cursor.cursor-link img {
     filter: drop-shadow(0 0 8px var(--accent-green));
+}
+
+#version-display {
+    position: fixed;
+    top: 8px;
+    right: 12px;
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.2);
+    z-index: 10000;
+    pointer-events: none;
+    font-family: monospace;
+    letter-spacing: 1px;
 }
