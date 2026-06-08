@@ -11,13 +11,14 @@ function placeChip(index) {
 
     if (['pan', 'link', 'move'].includes(selectedTool)) return;
     
-    const costs = { 'charger': 50, 'giver': 20, 'seller': 30, 'overclock': 80, 'storage': 40, 'splitter': 60, 'miner': 120, 'battery': 60 };
+    const costs = { 'charger': 50, 'giver': 20, 'seller': 30, 'overclock': 80, 'storage': 40, 'splitter': 60, 'miner': 120, 'battery': 60, 'processor': 100 };
     const cost = costs[selectedTool];
 
     if (selectedTool === 'overclock' && level < 3) return;
     if (selectedTool === 'miner' && level < 4) return;
     if ((selectedTool === 'storage' || selectedTool === 'battery') && level < 2) return;
     if (selectedTool === 'splitter' && level < 2) return;
+    if (selectedTool === 'processor' && level < 3) return;
 
     if (cost && money >= cost && coords.y <= gridSize - 4 && coords.x <= gridSize - 4 && isAreaFree(index, 4, 4)) {
         money -= cost;
@@ -26,7 +27,7 @@ function placeChip(index) {
     }
 }
 
-function createChip(type, index, w, h) {
+function createChip(type, index, w, h, existingId = null) {
     const coords = getCoords(index);
     const occupied = [];
     for (let i = 0; i < w; i++) {
@@ -35,7 +36,7 @@ function createChip(type, index, w, h) {
         }
     }
 
-    const chipId = Date.now() + Math.random();
+    const chipId = existingId || (Date.now() + Math.random());
     const div = document.createElement('div');
     div.className = `chip ${type}`;
     div.dataset.id = chipId;
@@ -60,6 +61,7 @@ function createChip(type, index, w, h) {
     if (type === 'seller')  portsHTML = '<div class="port in data"></div>';
     if (type === 'battery') portsHTML = '<div class="port in power"></div><div class="port out energy"></div>';
     if (type === 'overclock') portsHTML = '<div class="port in energy"></div><div class="port out speed"></div>';
+    if (type === 'processor') portsHTML = '<div class="port in power" style="left:30%"></div><div class="port in data" style="left:70%"></div><div class="port out data"></div>';
     if (type === 'storage') portsHTML = '<div class="port in data"></div><div class="port out data"></div>';
     if (type === 'splitter') {
         portsHTML = '<div class="port in data"></div>' + 
