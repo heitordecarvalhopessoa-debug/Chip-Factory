@@ -8,9 +8,10 @@ const shopItems = [
     { id: 'seller', category: 'sales', name: '💰 Seller', price: 30, desc: 'Converts data and crystals into cash.', minLevel: 1, io: { in: ['💾 Data'], out: ['💵 Cash'] } },
     { id: 'battery', category: 'energy', name: '🔋 Battery', price: 60, desc: 'Required to power Miners. Stores energy.', minLevel: 2, io: { in: ['⚡ Power'], out: ['🔋 Energy'] } },
     { id: 'storage', category: 'logistics', name: '📦 Storage', price: 40, desc: 'Accumulates data for later processing.', minLevel: 2, io: { in: ['💾 Data'], out: ['💾 Data'] } },
-    { id: 'overclock', category: 'upgrade', name: '🚀 Overclock', price: 80, desc: 'Acelera a produção de chips adjacentes.', minLevel: 3, io: { in: ['⚡ Power'], out: ['🚀 Speed'] } },
+    { id: 'overclock', category: 'upgrade', name: '🚀 Overclock', price: 80, desc: 'Speeds up the production of adjacent chips.', minLevel: 3, io: { in: ['⚡ Power'], out: ['🚀 Speed'] } },
     { id: 'splitter', category: 'logistics', name: '🌿 Splitter', price: 60, desc: 'Divides a data stream into multiple outputs.', minLevel: 2, io: { in: ['💾 Data'], out: ['💾 Data (x2)'] } },
-    { id: 'miner', category: 'production', name: '⛏️ Miner', price: 120, desc: 'Extracts valuable Crypto ($10/u). High demand.', minLevel: 4, io: { in: ['⚡ Power', '🚀 Speed'], out: ['💎 Crypto'] } }
+    { id: 'miner', category: 'production', name: '⛏️ Miner', price: 120, desc: 'Extracts valuable Crypto ($10/u). High demand.', minLevel: 4, io: { in: ['⚡ Power', '🚀 Speed'], out: ['💎 Crypto'] } },
+    { id: 'processor', category: 'upgrade', name: '⚙️ Processor', price: 100, desc: 'Refines data to increase its value (x5).', minLevel: 3, io: { in: ['⚡ Power', '💾 Data'], out: ['💾 Data'] } }
 ];
 
 function setShopFilter(filter) {
