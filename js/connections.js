@@ -16,12 +16,13 @@ function handleChipClick(chip) {
 }
 
 function createLink(source, target) {
-    const valid = (source.type === 'charger' && (target.type === 'giver' || target.type === 'battery')) ||
+    const valid = (source.type === 'charger' && (target.type === 'giver' || target.type === 'battery' || target.type === 'processor')) ||
                   (source.type === 'battery' && (target.type === 'miner' || target.type === 'overclock')) ||
-                  (source.type === 'giver' && (target.type === 'seller' || target.type === 'storage' || target.type === 'splitter')) ||
-                  (source.type === 'miner' && (target.type === 'seller' || target.type === 'storage' || target.type === 'splitter')) ||
-                  (source.type === 'storage' && (target.type === 'seller' || target.type === 'splitter')) ||
-                  (source.type === 'splitter' && (target.type === 'seller' || target.type === 'storage' || target.type === 'splitter')) ||
+                  (source.type === 'giver' && (target.type === 'seller' || target.type === 'storage' || target.type === 'splitter' || target.type === 'processor')) ||
+                  (source.type === 'miner' && (target.type === 'seller' || target.type === 'storage' || target.type === 'splitter' || target.type === 'processor')) ||
+                  (source.type === 'storage' && (target.type === 'seller' || target.type === 'splitter' || target.type === 'processor')) ||
+                  (source.type === 'splitter' && (target.type === 'seller' || target.type === 'storage' || target.type === 'splitter' || target.type === 'processor')) ||
+                  (source.type === 'processor' && (target.type === 'seller' || target.type === 'storage' || target.type === 'splitter')) ||
                   (source.type === 'overclock' && (target.type === 'giver' || target.type === 'miner'));
     
     if (valid && !connections.find(c => c.from === source && c.to === target)) {
@@ -137,6 +138,8 @@ function drawPath(x1, y1, x2, y2, type, isPending, fromType, toType, connRef) {
             color = '#a855f7';
         } else if (fromType === 'splitter' || toType === 'splitter') {
             color = '#2dd4bf';
+        } else if (fromType === 'processor' || toType === 'processor') {
+            color = '#f472b6';
         }
 
         path.setAttribute("d", d);
