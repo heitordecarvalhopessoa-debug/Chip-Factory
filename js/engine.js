@@ -1,3 +1,7 @@
+window.addEventListener('DOMContentLoaded', () => {
+    if (typeof loadGame === 'function') loadGame();
+});
+
 setInterval(() => {
     chips.forEach(c => {
         c.powered = (c.type === 'charger');
@@ -85,6 +89,8 @@ setInterval(() => {
             status.innerHTML = `<div class="status-dot on"></div> ${c.data} units`;
         } else if (c.type === 'splitter') {
             status.innerHTML = `<div class="status-dot on"></div> ${c.data}d`;
+        } else if (c.type === 'processor') {
+            status.innerHTML = `<div class="status-dot ${c.powered ? 'on' : 'off'}"></div> ${c.data}d`;
         } else if (c.type === 'miner') {
             status.innerHTML = `<div class="status-dot ${c.powered ? 'on' : 'off'}"></div> ${c.data}c`;
         }
@@ -93,6 +99,8 @@ setInterval(() => {
     updateUI();
     renderConnections();
     checkAchievements();
+
+    if (typeof saveGame === 'function') saveGame();
 }, 1000);
 
 function checkAchievements() {
@@ -107,7 +115,10 @@ function checkAchievements() {
 }
 
 function processSale(amount, sellerChip, sourceChipType) {
-    const valuePerUnit = (sourceChipType === 'miner') ? 10 : 1;
+    let valuePerUnit = 1;
+    if (sourceChipType === 'miner') valuePerUnit = 10;
+    if (sourceChipType === 'processor') valuePerUnit = 5;
+    
     const profit = amount * valuePerUnit;
     money += profit;
     xp += profit;
