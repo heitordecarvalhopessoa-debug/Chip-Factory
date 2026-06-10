@@ -9,7 +9,8 @@ function saveGame() {
             type: c.type,
             bounds: c.bounds,
             data: c.data,
-            energy: c.energy
+            energy: c.energy,
+            active: c.active
         })),
         connections: connections.map(conn => ({
             fromId: conn.from.id,
@@ -33,7 +34,7 @@ function loadGame() {
         chips.length = 0;
         connections.length = 0;
 
-        money = data.money;
+        money = Math.floor(data.money || 0);
         level = data.level;
         xp = data.xp;
         xpTarget = data.xpTarget;
@@ -45,6 +46,7 @@ function loadGame() {
             if (newChip) {
                 newChip.data = c.data || 0;
                 newChip.energy = c.energy;
+                if (c.active !== undefined) newChip.active = c.active;
             }
         });
 
