@@ -79,6 +79,9 @@ function createChip(type, index, w, h, existingId = null) {
     if (type === 'battery') {
         internalHTML += `<div class="energy-bar-container"><div class="energy-bar-fill" id="energy-${chipId}"></div></div>`;
     }
+    if (type === 'storage') {
+        internalHTML += `<div class="energy-bar-container" style="border-color: #a855f7;"><div class="energy-bar-fill" id="data-bar-${chipId}" style="background: #a855f7;"></div></div>`;
+    }
     div.innerHTML = portsHTML + internalHTML;
 
     if (type === 'splitter') {
@@ -141,6 +144,7 @@ function createChip(type, index, w, h, existingId = null) {
         data: 0,
         overclocked: false,
         energy: type === 'battery' ? 0 : undefined,
+        maxData: type === 'storage' ? 200 : undefined,
         isCharging: type === 'battery' ? true : undefined,
         active: type === 'autosell' ? false : undefined
     };
