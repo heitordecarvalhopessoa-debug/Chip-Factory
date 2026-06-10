@@ -11,11 +11,14 @@ function placeChip(index) {
 
     if (['pan', 'link', 'move'].includes(selectedTool)) return;
     
-    const costs = { 'charger': 50, 'giver': 20, 'seller': 30, 'overclock': 80, 'storage': 40, 'splitter': 60, 'miner': 120, 'battery': 60, 'processor': 100 };
+    const costs = { 'charger': 50, 'giver': 20, 'seller': 30, 'overclock': 80, 'storage': 40, 'splitter': 60, 'miner': 120, 'battery': 60, 'processor': 100, 'nexus': 250, 'market': 200, 'autosell': 300 };
     const cost = costs[selectedTool];
 
+    if (selectedTool === 'nexus' && level < 6) return;
+    if (selectedTool === 'market' && level < 5) return;
     if (selectedTool === 'overclock' && level < 3) return;
     if (selectedTool === 'miner' && level < 4) return;
+    if (selectedTool === 'autosell' && level < 7) return;
     if ((selectedTool === 'storage' || selectedTool === 'battery') && level < 2) return;
     if (selectedTool === 'splitter' && level < 2) return;
     if (selectedTool === 'processor' && level < 3) return;
@@ -58,16 +61,19 @@ function createChip(type, index, w, h, existingId = null) {
     if (type === 'charger') portsHTML = '<div class="port out power"></div>';
     if (type === 'giver')   portsHTML = '<div class="port in power"></div><div class="port in speed"></div><div class="port out data"></div>';
     if (type === 'miner')   portsHTML = '<div class="port in energy"></div><div class="port in speed"></div><div class="port out data"></div>';
-    if (type === 'seller')  portsHTML = '<div class="port in data"></div>';
+    if (type === 'seller')  portsHTML = '<div class="port in power"></div><div class="port in data"></div>';
+    if (type === 'market')  portsHTML = '<div class="port in power"></div><div class="port in data"></div><div class="port out data"></div>';
     if (type === 'battery') portsHTML = '<div class="port in power"></div><div class="port out energy"></div>';
     if (type === 'overclock') portsHTML = '<div class="port in energy"></div><div class="port out speed"></div>';
     if (type === 'processor') portsHTML = '<div class="port in power" style="left:30%"></div><div class="port in data" style="left:70%"></div><div class="port out data"></div>';
+    if (type === 'nexus') portsHTML = '<div class="port in power"></div><div class="port out energy" style="left:30%"></div><div class="port out speed" style="left:70%"></div>';
     if (type === 'storage') portsHTML = '<div class="port in data"></div><div class="port out data"></div>';
     if (type === 'splitter') {
         portsHTML = '<div class="port in data"></div>' + 
                     '<div class="port out data" style="left: 30%"></div>' + 
                     '<div class="port out data" style="left: 70%"></div>';
     }
+    if (type === 'autosell') portsHTML = '';
 
     let internalHTML = `<div style="pointer-events:none; z-index:1;">${type.toUpperCase()}<br><span class="status"></span></div>`;
     if (type === 'battery') {
@@ -99,6 +105,22 @@ function createChip(type, index, w, h, existingId = null) {
         div.appendChild(btn);
     }
 
+    if (type === 'autosell') {
+        const btn = document.createElement('button');
+        btn.className = 'add-port-btn'; 
+        btn.innerText = 'OFF';
+        btn.style.position = 'relative';
+        btn.style.left = 'auto';
+        btn.style.marginTop = '10px';
+        btn.onclick = (e) => {
+            e.stopPropagation();
+            chipObj.active = !chipObj.active;
+            btn.innerText = chipObj.active ? 'ON' : 'OFF';
+            btn.style.background = chipObj.active ? '#00ff88' : '#444';
+        };
+        div.appendChild(btn);
+    }
+
     div.addEventListener('contextmenu', (e) => showContextMenu(e, chipObj));
 
     div.addEventListener('click', (e) => {
@@ -118,7 +140,9 @@ function createChip(type, index, w, h, existingId = null) {
         powered: false,
         data: 0,
         overclocked: false,
-        energy: type === 'battery' ? 0 : undefined
+        energy: type === 'battery' ? 0 : undefined,
+        isCharging: type === 'battery' ? true : undefined,
+        active: type === 'autosell' ? false : undefined
     };
     chips.push(chipObj);
 }
