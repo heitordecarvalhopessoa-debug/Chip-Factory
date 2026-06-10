@@ -16,14 +16,16 @@ function handleChipClick(chip) {
 }
 
 function createLink(source, target) {
-    const valid = (source.type === 'charger' && (target.type === 'giver' || target.type === 'battery' || target.type === 'processor')) ||
-                  (source.type === 'battery' && (target.type === 'miner' || target.type === 'overclock')) ||
-                  (source.type === 'giver' && (target.type === 'seller' || target.type === 'storage' || target.type === 'splitter' || target.type === 'processor')) ||
-                  (source.type === 'miner' && (target.type === 'seller' || target.type === 'storage' || target.type === 'splitter' || target.type === 'processor')) ||
-                  (source.type === 'storage' && (target.type === 'seller' || target.type === 'splitter' || target.type === 'processor')) ||
-                  (source.type === 'splitter' && (target.type === 'seller' || target.type === 'storage' || target.type === 'splitter' || target.type === 'processor')) ||
+    const valid = (source.type === 'charger' && (target.type === 'giver' || target.type === 'battery' || target.type === 'processor' || target.type === 'seller' || target.type === 'market')) ||
+                  (source.type === 'charger' && target.type === 'nexus') ||
+                  ((source.type === 'battery' || source.type === 'nexus') && (target.type === 'miner' || target.type === 'overclock')) ||
+                  (source.type === 'giver' && (target.type === 'seller' || target.type === 'market' || target.type === 'storage' || target.type === 'splitter' || target.type === 'processor')) ||
+                  (source.type === 'miner' && (target.type === 'seller' || target.type === 'market' || target.type === 'storage' || target.type === 'splitter' || target.type === 'processor')) ||
+                  (source.type === 'market' && (target.type === 'seller' || target.type === 'storage' || target.type === 'splitter' || target.type === 'processor')) ||
+                  (source.type === 'storage' && (target.type === 'seller' || target.type === 'market' || target.type === 'splitter' || target.type === 'processor')) ||
+                  (source.type === 'splitter' && (target.type === 'seller' || target.type === 'market' || target.type === 'storage' || target.type === 'splitter' || target.type === 'processor')) ||
                   (source.type === 'processor' && (target.type === 'seller' || target.type === 'storage' || target.type === 'splitter')) ||
-                  (source.type === 'overclock' && (target.type === 'giver' || target.type === 'miner'));
+                  ((source.type === 'overclock' || source.type === 'nexus') && (target.type === 'giver' || target.type === 'miner'));
     
     if (valid && !connections.find(c => c.from === source && c.to === target)) {
             
