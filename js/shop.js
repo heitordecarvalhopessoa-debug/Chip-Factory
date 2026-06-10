@@ -11,7 +11,10 @@ const shopItems = [
     { id: 'overclock', category: 'upgrade', name: '🚀 Overclock', price: 80, desc: 'Speeds up the production of adjacent chips.', minLevel: 3, io: { in: ['⚡ Power'], out: ['🚀 Speed'] } },
     { id: 'splitter', category: 'logistics', name: '🌿 Splitter', price: 60, desc: 'Divides a data stream into multiple outputs.', minLevel: 2, io: { in: ['💾 Data'], out: ['💾 Data (x2)'] } },
     { id: 'miner', category: 'production', name: '⛏️ Miner', price: 120, desc: 'Extracts valuable Crypto ($10/u). High demand.', minLevel: 4, io: { in: ['⚡ Power', '🚀 Speed'], out: ['💎 Crypto'] } },
-    { id: 'processor', category: 'upgrade', name: '⚙️ Processor', price: 100, desc: 'Refines data to increase its value (x5).', minLevel: 3, io: { in: ['⚡ Power', '💾 Data'], out: ['💾 Data'] } }
+    { id: 'processor', category: 'upgrade', name: '⚙️ Processor', price: 100, desc: 'Refines data to increase its value (x5).', minLevel: 3, io: { in: ['⚡ Power', '💾 Data'], out: ['💾 Data'] } },
+    { id: 'nexus', category: 'upgrade', name: '💠 Nexus', price: 250, desc: 'Late-game core. High cost, high reward.', minLevel: 6, io: { in: ['⚡ Power'], out: ['🔋 Energy', '🚀 Speed'] } },
+    { id: 'market', category: 'sales', name: '🏪 Market Core', price: 200, desc: 'Stores data. When powered, sells through Sellers with 2.5x value.', minLevel: 5, io: { in: ['⚡ Power', '💾 Data'], out: ['💾 Data (Boosted)'] } },
+    { id: 'autosell', category: 'sales', name: '🕹️ Auto Sell', price: 300, desc: 'Global Toggle: Sells all data in the system instantly when active.', minLevel: 7, io: { in: [], out: [] } }
 ];
 
 function setShopFilter(filter) {
