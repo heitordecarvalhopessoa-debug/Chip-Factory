@@ -4,12 +4,21 @@ function saveGame() {
         level: level,
         xp: xp,
         xpTarget: xpTarget,
+        prestigeMultiplier: prestigeMultiplier,
+        prestigePoints: prestigePoints,
+        tutorialStep: tutorialStep,
+        zoom: zoom,
+        camX: camX,
+        camY: camY,
         chips: chips.map(c => ({
             id: c.id,
             type: c.type,
             bounds: c.bounds,
             data: c.data,
             energy: c.energy,
+            maxData: c.maxData,
+            extraPorts: c.extraPorts,
+            isCharging: c.isCharging,
             active: c.active
         })),
         connections: connections.map(conn => ({
@@ -38,15 +47,35 @@ function loadGame() {
         level = data.level;
         xp = data.xp;
         xpTarget = data.xpTarget;
+        prestigeMultiplier = data.prestigeMultiplier || 1;
+        prestigePoints = data.prestigePoints || 0;
+        tutorialStep = data.tutorialStep !== undefined ? data.tutorialStep : -1;
+
+        zoom = data.zoom || 1.0;
+        camX = data.camX || 0;
+        camY = data.camY || 0;
+        if (typeof updateViewport === 'function') updateViewport();
 
         data.chips.forEach(c => {
             const index = c.bounds.y * gridSize + c.bounds.x;
-            createChip(c.type, index, c.bounds.w, c.bounds.h, c.id);
+            createChip(c.type, index, c.bounds.w, c.bounds.h, c.id, c.extraPorts || 0);
             const newChip = chips.find(chip => chip.id === c.id);
             if (newChip) {
-                newChip.data = c.data || 0;
+                newChip.data = Number(c.data) || 0;
                 newChip.energy = c.energy;
+                if (c.maxData !== undefined) newChip.maxData = c.maxData;
+                if (c.isCharging !== undefined) newChip.isCharging = c.isCharging;
                 if (c.active !== undefined) newChip.active = c.active;
+
+                if (newChip.type === 'autosell') {
+                    const btn = newChip.element.querySelector('button');
+                    if (btn) {
+                        btn.innerText = newChip.active ? 'ON' : 'OFF';
+                        btn.style.background = newChip.active ? '#00ff88' : '#444';
+                    }
+                }
+                
+                if (typeof refreshChipStatus === 'function') refreshChipStatus(newChip);
             }
         });
 
@@ -58,7 +87,8 @@ function loadGame() {
                 const outPorts = source.element.querySelectorAll('.port.out');
                 const inPorts = target.element.querySelectorAll('.port.in');
                 
-                if (outPorts[connData.fromPortIndex] && inPorts[connData.toPortIndex]) {
+                if (connData.fromPortIndex !== -1 && connData.toPortIndex !== -1 && 
+                    outPorts[connData.fromPortIndex] && inPorts[connData.toPortIndex]) {
                     connections.push({
                         from: source,
                         fromPort: outPorts[connData.fromPortIndex],
@@ -79,6 +109,8 @@ function loadGame() {
 }
 
 function clearSave() {
-    localStorage.removeItem('chipFactory_saveData');
-    location.reload();
+    if (confirm("⚠️ WARNING: This will PERMANENTLY DELETE your factory, money, and levels. Proceed?")) {
+        localStorage.removeItem('chipFactory_saveData');
+        location.reload();
+    }
 }
