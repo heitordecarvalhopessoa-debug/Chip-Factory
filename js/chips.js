@@ -30,7 +30,7 @@ function placeChip(index) {
     }
 }
 
-function createChip(type, index, w, h, existingId = null) {
+function createChip(type, index, w, h, existingId = null, extraPorts = 0) {
     const coords = getCoords(index);
     const occupied = [];
     for (let i = 0; i < w; i++) {
@@ -66,12 +66,15 @@ function createChip(type, index, w, h, existingId = null) {
     if (type === 'battery') portsHTML = '<div class="port in power"></div><div class="port out energy"></div>';
     if (type === 'overclock') portsHTML = '<div class="port in energy"></div><div class="port out speed"></div>';
     if (type === 'processor') portsHTML = '<div class="port in power" style="left:30%"></div><div class="port in data" style="left:70%"></div><div class="port out data"></div>';
-    if (type === 'nexus') portsHTML = '<div class="port in power"></div><div class="port out energy" style="left:30%"></div><div class="port out speed" style="left:70%"></div>';
     if (type === 'storage') portsHTML = '<div class="port in data"></div><div class="port out data"></div>';
+    if (type === 'nexus') portsHTML = '<div class="port in power"></div><div class="port out energy" style="left:30%"></div><div class="port out speed" style="left:70%"></div>';
     if (type === 'splitter') {
-        portsHTML = '<div class="port in data"></div>' + 
-                    '<div class="port out data" style="left: 30%"></div>' + 
-                    '<div class="port out data" style="left: 70%"></div>';
+        portsHTML = '<div class="port in data"></div>';
+        const totalOuts = 2 + extraPorts;
+        for (let i = 0; i < totalOuts; i++) {
+            const pos = ((i + 1) * 100 / (totalOuts + 1)) + '%';
+            portsHTML += `<div class="port out data" style="left: ${pos}"></div>`;
+        }
     }
     if (type === 'autosell') portsHTML = '';
 
@@ -93,6 +96,7 @@ function createChip(type, index, w, h, existingId = null) {
             e.stopPropagation();
             if (money >= 20) {
                 money -= 20;
+                chipObj.extraPorts = (chipObj.extraPorts || 0) + 1;
                 const newPort = document.createElement('div');
                 newPort.className = 'port out data';
                 div.appendChild(newPort);
@@ -146,7 +150,8 @@ function createChip(type, index, w, h, existingId = null) {
         energy: type === 'battery' ? 0 : undefined,
         maxData: type === 'storage' ? 200 : undefined,
         isCharging: type === 'battery' ? true : undefined,
-        active: type === 'autosell' ? false : undefined
+        active: type === 'autosell' ? false : undefined,
+        extraPorts: type === 'splitter' ? extraPorts : undefined
     };
     chips.push(chipObj);
 }
