@@ -1,4 +1,4 @@
-const GAME_VERSION = "0.4.0";
+const GAME_VERSION = "0.5.0";
 
 window.addEventListener('DOMContentLoaded', () => {
     const versionElement = document.createElement('div');
