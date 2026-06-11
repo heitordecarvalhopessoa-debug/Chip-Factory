@@ -8,6 +8,10 @@ let xp = 0;
 let xpTarget = 100;
 let camX = 0, camY = 0;
 let isPanning = false;
+let tutorialStep = 0;
+
+let prestigeMultiplier = 1;
+let prestigePoints = 0;
 
 const gridSize = 100;
 let chips = [];
@@ -39,7 +43,38 @@ let achievements = [
         progressCondition: () => ({ current: chips.length, target: 15 }), 
         achieved: false 
     },
-    { id: 'overclock_king', title: 'Fast & Furious', desc: 'Have a chip operating in Overclock.', condition: () => chips.some(c => c.overclocked), progressCondition: null, achieved: false }
+    { id: 'overclock_king', title: 'Fast & Furious', desc: 'Have a chip operating in Overclock.', condition: () => chips.some(c => c.overclocked), progressCondition: null, achieved: false },
+    { 
+        id: 'tycoon', 
+        title: 'Tycoon', 
+        desc: 'Accumulate $5,000 in cash.', 
+        condition: () => money >= 5000, 
+        progressCondition: () => ({ current: money, target: 5000 }), 
+        achieved: false 
+    },
+    { 
+        id: 'nexus_built', 
+        title: 'Nexus Link', 
+        desc: 'Construct a Nexus Core in your factory.', 
+        condition: () => chips.some(c => c.type === 'nexus'), 
+        achieved: false 
+    },
+    { 
+        id: 'power_grid', 
+        title: 'Power Grid', 
+        desc: 'Have 5 batteries connected simultaneously.', 
+        condition: () => chips.filter(c => c.type === 'battery').length >= 5, 
+        progressCondition: () => ({ current: chips.filter(c => c.type === 'battery').length, target: 5 }), 
+        achieved: false 
+    },
+    { 
+        id: 'industrialist', 
+        title: 'Industrialist', 
+        desc: 'Have 10 production chips (Givers or Miners).', 
+        condition: () => chips.filter(c => c.type === 'giver' || c.type === 'miner').length >= 10, 
+        progressCondition: () => ({ current: chips.filter(c => c.type === 'giver' || c.type === 'miner').length, target: 10 }), 
+        achieved: false 
+    }
 ];
 
 const gridElement = document.getElementById('grid');
