@@ -1,3 +1,34 @@
+function canConnect(source, target, type) {
+    if (source === target) return false;
+
+    if (source.type === 'charger' && target.type === 'seller') return false;
+    if (source.type === 'seller' && target.type === 'charger') return false;
+
+    const rules = {
+        'power': {
+            from: ['charger'],
+            to: ['giver', 'battery', 'processor', 'market', 'nexus']
+        },
+        'energy': {
+            from: ['battery', 'nexus'],
+            to: ['miner', 'overclock']
+        },
+        'speed': {
+            from: ['overclock', 'nexus'],
+            to: ['giver', 'miner']
+        },
+        'data': {
+            from: ['giver', 'miner', 'market', 'storage', 'splitter', 'processor'],
+            to: ['seller', 'market', 'storage', 'splitter', 'processor']
+        }
+    };
+
+    const rule = rules[type];
+    if (!rule) return false;
+
+    return rule.from.includes(source.type) && rule.to.includes(target.type);
+}
+
 function handleChipClick(chip) {
     if (selectedTool === 'link') {
         if (!firstSelection) {
@@ -16,39 +47,27 @@ function handleChipClick(chip) {
 }
 
 function createLink(source, target) {
-    const valid = (source.type === 'charger' && (target.type === 'giver' || target.type === 'battery' || target.type === 'processor' || target.type === 'seller' || target.type === 'market')) ||
-                  (source.type === 'charger' && target.type === 'nexus') ||
-                  ((source.type === 'battery' || source.type === 'nexus') && (target.type === 'miner' || target.type === 'overclock')) ||
-                  (source.type === 'giver' && (target.type === 'seller' || target.type === 'market' || target.type === 'storage' || target.type === 'splitter' || target.type === 'processor')) ||
-                  (source.type === 'miner' && (target.type === 'seller' || target.type === 'market' || target.type === 'storage' || target.type === 'splitter' || target.type === 'processor')) ||
-                  (source.type === 'market' && (target.type === 'seller' || target.type === 'storage' || target.type === 'splitter' || target.type === 'processor')) ||
-                  (source.type === 'storage' && (target.type === 'seller' || target.type === 'market' || target.type === 'splitter' || target.type === 'processor')) ||
-                  (source.type === 'splitter' && (target.type === 'seller' || target.type === 'market' || target.type === 'storage' || target.type === 'splitter' || target.type === 'processor')) ||
-                  (source.type === 'processor' && (target.type === 'seller' || target.type === 'storage' || target.type === 'splitter')) ||
-                  ((source.type === 'overclock' || source.type === 'nexus') && (target.type === 'giver' || target.type === 'miner'));
-    
-    if (valid && !connections.find(c => c.from === source && c.to === target)) {
-            
-            const fromPort = source.element.querySelector('.port.out');
-            const toPort = target.element.querySelector('.port.in');
-            
-            if (fromPort && toPort) {
-                let type = 'data';
-                if (fromPort.classList.contains('power')) type = 'power';
-                if (fromPort.classList.contains('speed')) type = 'speed';
-                if (fromPort.classList.contains('energy')) type = 'energy';
+    const fromPort = source.element.querySelector('.port.out');
+    const toPort = target.element.querySelector('.port.in');
 
-                connections.push({ 
-                    from: source, 
-                    fromPort: fromPort, 
-                    to: target, 
-                    toPort: toPort,
-                    type: type
-                });
-                if (typeof renderConnections === 'function') renderConnections();
-            }
+    if (fromPort && toPort) {
+        let type = 'data';
+        if (fromPort.classList.contains('power')) type = 'power';
+        if (fromPort.classList.contains('speed')) type = 'speed';
+        if (fromPort.classList.contains('energy')) type = 'energy';
+
+        if (canConnect(source, target, type) && !connections.find(c => c.from === source && c.to === target)) {
+            connections.push({ 
+                from: source, 
+                fromPort: fromPort, 
+                to: target, 
+                toPort: toPort,
+                type: type
+            });
+            if (typeof renderConnections === 'function') renderConnections();
         }
     }
+}
 
 document.addEventListener('click', (e) => {
     if (selectedTool !== 'link') return;
@@ -75,7 +94,7 @@ document.addEventListener('click', (e) => {
         }
     } else {
         
-        if (!isOut && type === pendingPort.type && chip !== pendingPort.chip) {
+        if (!isOut && type === pendingPort.type && canConnect(pendingPort.chip, chip, type)) {
             connections.push({
                 from: pendingPort.chip,
                 fromPort: pendingPort.element,
@@ -123,26 +142,10 @@ function drawPath(x1, y1, x2, y2, type, isPending, fromType, toType, connRef) {
         const midX = x1 + (x2 - x1) / 2;
         const d = `M ${x1} ${y1} L ${midX} ${y1} L ${midX} ${y2} L ${x2} ${y2}`;
 
-        let color = type === 'power' ? '#00d4ff' : '#00ff88';
-
-        if (type === 'speed') color = '#ffff00';
+        let color = '#00ff88';
+        if (type === 'power')  color = '#00d4ff';
+        if (type === 'speed')  color = '#ffff00';
         if (type === 'energy') color = '#ff4444';
-        
-        if (fromType === 'giver' && toType === 'seller') {
-            color = '#ffcc00';
-        } else if (fromType === 'charger') {
-            color = '#00d4ff';
-        } else if (fromType === 'giver' && toType === 'giver') {
-            color = '#00ff88';
-        } else if (fromType === 'miner') {
-            color = '#fbbf24';
-        } else if (toType === 'storage' || fromType === 'storage') {
-            color = '#a855f7';
-        } else if (fromType === 'splitter' || toType === 'splitter') {
-            color = '#2dd4bf';
-        } else if (fromType === 'processor' || toType === 'processor') {
-            color = '#f472b6';
-        }
 
         path.setAttribute("d", d);
         path.setAttribute("fill", "none");
