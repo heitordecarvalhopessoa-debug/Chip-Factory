@@ -74,6 +74,17 @@ function updateUI() {
         lastTotalData = totalData;
     }
     
+    // Update Prestige Boost visibility and value
+    const prestigeInfo = document.getElementById('prestige-boost-info');
+    if (prestigeInfo) {
+        if (prestigeMultiplier > 1) {
+            prestigeInfo.style.display = 'block';
+            document.getElementById('prestige-boost-val').innerText = Math.round((prestigeMultiplier - 1) * 100);
+        } else {
+            prestigeInfo.style.display = 'none';
+        }
+    }
+
     if (typeof renderShop === 'function') renderShop();
 }
 
@@ -338,6 +349,29 @@ function addAchievementButton() {
     document.body.appendChild(btn);
 }
 
+function addPrestigeButton() {
+    if (document.getElementById('btn-prestige')) return;
+    const btn = document.createElement('button');
+    btn.id = 'btn-prestige';
+    btn.innerHTML = '⚛️';
+    btn.title = 'Prestige System';
+    btn.onclick = togglePrestigeMenu;
+    Object.assign(btn.style, {
+        position: 'fixed',
+        top: '70px',
+        right: '20px',
+        zIndex: '3000',
+        padding: '10px',
+        background: '#222',
+        border: '1px solid #ff00ff',
+        borderRadius: '50%',
+        cursor: 'pointer',
+        fontSize: '1.2em',
+        boxShadow: '0 0 10px rgba(255, 0, 255, 0.2)'
+    });
+    document.body.appendChild(btn);
+}
+
 window.addEventListener('contextmenu', (e) => e.preventDefault());
 
 document.addEventListener('click', (e) => {
@@ -372,5 +406,6 @@ ws.onwheel = (e) => {
 };
 
 selectTool('pan');
-updateUI();
 addAchievementButton();
+addPrestigeButton();
+updateUI();
