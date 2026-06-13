@@ -1,21 +1,55 @@
+// Injeção de estilos globais para animações da loja
+if (!document.getElementById('shop-animations-css')) {
+    const style = document.createElement('style');
+    style.id = 'shop-animations-css';
+    style.innerHTML = `
+        .shop-item {
+            transition: transform 0.1s ease-out, box-shadow 0.1s ease-out, border-color 0.1s ease-out;
+            backface-visibility: hidden;
+            transform: perspective(1px) translateZ(0); /* Forces hardware acceleration */
+        }
+
+        .shop-item:not(.locked):hover {
+            transform: perspective(1px) scale(1.02) translateZ(0); /* Scale slightly on hover */
+            z-index: 10;
+            border-color: rgba(0, 255, 136, 0.5) !important;
+        }
+
+        @keyframes affordable-pulse {
+            0% { border-color: rgba(0, 255, 136, 0.2); }
+            50% { border-color: rgba(0, 255, 136, 0.6); box-shadow: inset 0 0 8px rgba(0, 255, 136, 0.1); }
+            100% { border-color: rgba(0, 255, 136, 0.2); }
+        }
+
+        .shop-item.can-afford:not(.locked) {
+            animation: affordable-pulse 2s infinite ease-in-out;
+        }
+
+        @keyframes shake-error {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-4px); }
+            75% { transform: translateX(4px); }
+        }
+        .insufficient-funds {
+            animation: shake-error 0.3s ease-in-out;
+            border-color: #ff4444 !important;
+        }
+
+        .filter-btn { 
+            transition: background 0.2s, color 0.2s, box-shadow 0.2s; 
+            backface-visibility: hidden;
+            transform: perspective(1px) translateZ(0); /* Forces hardware acceleration */
+        }
+        .filter-btn:hover { filter: brightness(1.2); } /* Brighten on hover */
+        .filter-btn.active { box-shadow: 0 0 12px currentColor; } /* Glow when active */
+
+    `;
+    document.head.appendChild(style);
+}
+
 let shopFilter = 'all';
 let shopSort = 'price-asc';
 let shopStatusFilter = 'all';
-
-const shopItems = [
-    { id: 'charger', category: 'energy', name: '⚡ Charger', price: 50, desc: 'Base power source for the system.', minLevel: 1, io: { in: [], out: ['⚡ Power'] } },
-    { id: 'giver', category: 'production', name: '📦 Giver', price: 20, desc: 'Generates 1 basic data per second.', minLevel: 1, io: { in: ['⚡ Power', '🚀 Speed'], out: ['💾 Data'] } },
-    { id: 'seller', category: 'sales', name: '💰 Seller', price: 30, desc: 'Converts data and crystals into cash.', minLevel: 1, io: { in: ['💾 Data'], out: ['💵 Cash'] } },
-    { id: 'battery', category: 'energy', name: '🔋 Battery', price: 60, desc: 'Required to power Miners. Stores energy.', minLevel: 2, io: { in: ['⚡ Power'], out: ['🔋 Energy'] } },
-    { id: 'storage', category: 'logistics', name: '📦 Storage', price: 40, desc: 'Accumulates data for later processing.', minLevel: 2, io: { in: ['💾 Data'], out: ['💾 Data'] } },
-    { id: 'overclock', category: 'upgrade', name: '🚀 Overclock', price: 80, desc: 'Speeds up the production of adjacent chips.', minLevel: 3, io: { in: ['⚡ Power'], out: ['🚀 Speed'] } },
-    { id: 'splitter', category: 'logistics', name: '🌿 Splitter', price: 60, desc: 'Divides a data stream into multiple outputs.', minLevel: 2, io: { in: ['💾 Data'], out: ['💾 Data (x2)'] } },
-    { id: 'miner', category: 'production', name: '⛏️ Miner', price: 120, desc: 'Extracts valuable Crypto ($10/u). High demand.', minLevel: 4, io: { in: ['⚡ Power', '🚀 Speed'], out: ['💎 Crypto'] } },
-    { id: 'processor', category: 'upgrade', name: '⚙️ Processor', price: 100, desc: 'Refines data to increase its value (x5).', minLevel: 3, io: { in: ['⚡ Power', '💾 Data'], out: ['💾 Data'] } },
-    { id: 'nexus', category: 'upgrade', name: '💠 Nexus', price: 250, desc: 'Late-game core. High cost, high reward.', minLevel: 6, io: { in: ['⚡ Power'], out: ['🔋 Energy', '🚀 Speed'] } },
-    { id: 'market', category: 'sales', name: '🏪 Market Core', price: 200, desc: 'Stores data. When powered, sells through Sellers with 2.5x value.', minLevel: 5, io: { in: ['⚡ Power', '💾 Data'], out: ['💾 Data (Boosted)'] } },
-    { id: 'autosell', category: 'sales', name: '🕹️ Auto Sell', price: 300, desc: 'Global Toggle: Sells all data in the system instantly when active.', minLevel: 7, io: { in: [], out: [] } }
-];
 
 function setShopFilter(filter) {
     shopFilter = filter;
@@ -35,43 +69,120 @@ function setStatusFilter(status) {
     renderShop();
 }
 
+function getCategoryColor(cat) {
+    const colors = {
+        'energy': '#00d4ff',
+        'production': '#fbbf24',
+        'sales': '#00ff88',
+        'logistics': '#a855f7',
+        'upgrade': '#ff00ff'
+    };
+    return colors[cat] || '#888';
+}
+
 function renderShop() {
     const container = document.getElementById('shop-items-container');
     if (!container) return;
+    
+    // O painel lateral onde a loja reside
+    const shopPanel = container.parentElement;
+
+    let header = document.getElementById('shop-header');
+    if (!header) {
+        header = document.createElement('div');
+        header.id = 'shop-header';
+        header.style = "display: flex; justify-content: space-between; align-items: center; padding: 14px; background: #111; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px 8px 0 0; transition: all 0.3s ease; margin-bottom: 0; user-select: none;";
+        header.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 8px; pointer-events: none;">
+                <span style="font-size: 1.2em; filter: drop-shadow(0 0 5px #00ff88);">🏭</span>
+                <span style="font-weight: 900; letter-spacing: 3px; color: #fff; font-size: 0.8em;">COMPONENT STORE</span>
+            </div>
+        `;
+        shopPanel.insertBefore(header, shopPanel.firstChild);
+    }
+
+    // Criamos um wrapper para o conteúdo que será minimizado "por completo"
+    let body = document.getElementById('shop-body');
+    if (!body) {
+        body = document.createElement('div');
+        body.id = 'shop-body';
+        body.style = "display: flex; flex-direction: column; gap: 0; transition: opacity 0.3s ease;";
+        
+        // Movemos os controles e o container para dentro do body
+        const existingControls = document.getElementById('shop-controls');
+        if (existingControls) body.appendChild(existingControls);
+        body.appendChild(container);
+        shopPanel.appendChild(body);
+    }
+    
+    body.style.display = 'flex';
 
     let controls = document.getElementById('shop-controls');
     if (!controls) {
         controls = document.createElement('div');
         controls.id = 'shop-controls';
-        controls.style = "display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 8px;";
+        controls.style = "display: flex; flex-direction: column; gap: 10px; padding: 15px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); border-top: none; border-bottom: none;";
         
         controls.innerHTML = `
-            <div class="filter-row" style="display: flex; gap: 5px; flex-wrap: wrap;">
-                <button class="filter-btn small ${shopStatusFilter==='all'?'active':''}" onclick="setStatusFilter('all')">All</button>
-                <button class="filter-btn small ${shopStatusFilter==='unlocked'?'active':''}" onclick="setStatusFilter('unlocked')">🔓 Unlocked</button>
-                <button class="filter-btn small ${shopStatusFilter==='locked'?'active':''}" onclick="setStatusFilter('locked')">🔒 Locked</button>
+            <div style="font-size: 0.65em; color: #00ff88; font-weight: 900; letter-spacing: 1.5px; margin-bottom: 2px;">CATEGORIES</div>
+            <div class="category-filters" style="display: flex; gap: 4px; flex-wrap: wrap; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 12px;">
+                <button class="filter-btn small" data-filter="all" onclick="setShopFilter('all')" style="flex: 1; min-width: 50px;">ALL</button>
+                <button class="filter-btn small" data-filter="energy" onclick="setShopFilter('energy')" style="flex: 1; border-color: ${getCategoryColor('energy')}">POWER</button>
+                <button class="filter-btn small" data-filter="production" onclick="setShopFilter('production')" style="flex: 1; border-color: ${getCategoryColor('production')}">PROD</button>
+                <button class="filter-btn small" data-filter="sales" onclick="setShopFilter('sales')" style="flex: 1; border-color: ${getCategoryColor('sales')}">SALES</button>
+                <button class="filter-btn small" data-filter="logistics" onclick="setShopFilter('logistics')" style="flex: 1; border-color: ${getCategoryColor('logistics')}">LOGIC</button>
+                <button class="filter-btn small" data-filter="upgrade" onclick="setShopFilter('upgrade')" style="flex: 1; border-color: ${getCategoryColor('upgrade')}">UPGR</button>
             </div>
-            <select onchange="setShopSort(this.value)" style="background: #222; color: white; border: 1px solid #444; padding: 5px; border-radius: 4px; cursor: pointer;">
-                <option value="price-asc" ${shopSort==='price-asc'?'selected':''}>💰 Lowest Price</option>
-                <option value="price-desc" ${shopSort==='price-desc'?'selected':''}>💎 Highest Price</option>
-                <option value="level" ${shopSort==='level'?'selected':''}>📈 Tech Level</option>
-            </select>
+            
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 15px;">
+                <div style="flex: 1;">
+                    <div style="font-size: 0.65em; color: #888; font-weight: 900; letter-spacing: 1px; margin-bottom: 5px;">STOCK</div>
+                    <div class="filter-row" style="display: flex; gap: 4px;">
+                        <button class="filter-btn small" data-status="all" onclick="setStatusFilter('all')" style="flex:1; padding: 4px;">ALL</button>
+                        <button class="filter-btn small" data-status="unlocked" onclick="setStatusFilter('unlocked')" style="flex:1; padding: 4px;">🔓</button>
+                        <button class="filter-btn small" data-status="locked" onclick="setStatusFilter('locked')" style="flex:1; padding: 4px;">�</button>
+                    </div>
+                </div>
+                <div style="flex: 1.5;">
+                    <div style="font-size: 0.65em; color: #888; font-weight: 900; letter-spacing: 1px; margin-bottom: 5px;">SORTING</div>
+                    <select id="shop-sort-select" onchange="setShopSort(this.value)" style="width: 100%; background: #000; color: #fff; border: 1px solid #333; padding: 4px; border-radius: 4px; cursor: pointer; font-size: 0.8em; font-weight: bold;">
+                        <option value="price-asc">💰 Price: Low to High</option>
+                        <option value="price-desc">💎 Price: High to Low</option>
+                        <option value="level">📈 Tech Level</option>
+                    </select>
+                </div>
+            </div>
         `;
-        container.parentElement.insertBefore(controls, container);
+        body.insertBefore(controls, container);
+    }
+
+    // Atualiza apenas os estados visuais dos botões sem recriar o DOM
+    controls.querySelectorAll('[data-filter]').forEach(btn => btn.classList.toggle('active', btn.dataset.filter === shopFilter));
+    controls.querySelectorAll('[data-status]').forEach(btn => btn.classList.toggle('active', btn.dataset.status === shopStatusFilter));
+    
+    const select = document.getElementById('shop-sort-select');
+    if (select && document.activeElement !== select) {
+        select.value = shopSort;
     }
 
     Object.assign(container.style, {
         maxHeight: "65vh",
         overflowY: "auto",
-        paddingRight: "8px",
+        padding: "15px",
         display: "flex",
         flexDirection: "column",
         gap: "12px",
         scrollbarWidth: "thin",
-        scrollbarColor: "#00ff88 #222"
+        scrollbarColor: "#00ff88 #222",
+        background: "rgba(0,0,0,0.2)",
+        border: "1px solid rgba(255,255,255,0.1)",
+        borderRadius: "0 0 8px 8px",
+        borderTop: "none"
     });
 
     let items = [...shopItems];
+
+    items = items.filter(i => !i.needsResearch || (typeof researchedChips !== 'undefined' && researchedChips.includes(i.id)));
 
     if (shopFilter !== 'all') {
         items = items.filter(i => i.category === shopFilter);
@@ -87,14 +198,15 @@ function renderShop() {
         const aLocked = a.minLevel > level;
         const bLocked = b.minLevel > level;
 
-        
+        // Always put locked items at the bottom regardless of sort
         if (aLocked !== bLocked) return aLocked ? 1 : -1;
 
-        
-        if (a.minLevel !== b.minLevel) return a.minLevel - b.minLevel;
+        // Apply the actual chosen sort method
+        if (shopSort === 'price-asc') return a.price - b.price;
+        if (shopSort === 'price-desc') return b.price - a.price;
+        if (shopSort === 'level') return a.minLevel - b.minLevel;
 
-        
-        return a.price - b.price;
+        return 0;
     });
 
     container.innerHTML = '';
@@ -102,24 +214,34 @@ function renderShop() {
         const isLocked = item.minLevel > level;
         const canAfford = money >= item.price;
         const div = document.createElement('div');
-        div.className = `shop-item ${isLocked ? 'locked' : ''} ${!canAfford && !isLocked ? 'insufficient-funds' : ''} ${selectedTool === item.id ? 'active' : ''}`;
+        div.className = `shop-item ${isLocked ? 'locked' : ''} ${canAfford ? 'can-afford' : ''} ${selectedTool === item.id ? 'active' : ''}`;
         div.id = `btn-${item.id}`;
         div.onclick = () => selectTool(item.id);
         
+        const catColor = getCategoryColor(item.category);
+
         div.innerHTML = `
-            <div class="shop-item-header" style="display:flex; justify-content:space-between; font-size: 0.8em; opacity: 0.7;">
-                <span class="item-category">${item.category.toUpperCase()}</span>
-                <span class="item-price" style="font-weight:bold; color: ${canAfford ? '#2ecc71' : '#e74c3c'};">$${item.price}</span>
+            <div class="shop-item-header" style="display:flex; justify-content:space-between; align-items: center; margin-bottom: 6px;">
+                <span style="background: ${catColor}33; color: ${catColor}; padding: 2px 6px; border-radius: 4px; font-size: 0.65em; font-weight: 900; border: 1px solid ${catColor}66;">
+                    ${item.category.toUpperCase()}
+                </span>
+                <span class="item-price" style="font-weight: 900; color: ${canAfford ? '#00ff88' : '#ff4444'}; font-size: 1.1em;">
+                    $${new Intl.NumberFormat('en-US').format(item.price)}
+                </span>
             </div>
-            <div class="name" style="font-size: 1.1em; font-weight: bold; margin: 4px 0;">${item.name}</div>
-            <div class="desc" style="font-size: 0.85em; margin-bottom: 8px;">${item.desc}</div>
-            <div class="item-specs" style="font-size: 0.75em; background: rgba(0,0,0,0.2); padding: 4px; border-radius: 4px; margin-bottom: 8px;">
-                <div><strong>Input:</strong> ${item.io.in.length > 0 ? item.io.in.join(', ') : 'None'}</div>
-                <div><strong>Output:</strong> ${item.io.out.join(', ')}</div>
+            <div class="name" style="font-size: 1.1em; font-weight: bold; color: #fff; margin-bottom: 4px;">${item.name}</div>
+            <div class="desc" style="font-size: 0.8em; color: #999; line-height: 1.4; margin-bottom: 12px; min-height: 2.8em;">${item.desc}</div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.7em; background: rgba(0,0,0,0.3); padding: 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 10px;">
+                <div><span style="color: #666; font-weight: bold; display: block; margin-bottom: 2px;">INPUT</span> ${item.io.in.length > 0 ? item.io.in.join(', ') : '<span style="color:#444">NONE</span>'}</div>
+                <div><span style="color: #666; font-weight: bold; display: block; margin-bottom: 2px;">OUTPUT</span> ${item.io.out.join(', ')}</div>
             </div>
-            <div class="item-footer" style="font-size: 0.75em; border-top: 1px solid #444; pt-4 mt-2">
-                ${isLocked ? `<span style="color:#e74c3c">🔒 Level ${item.minLevel}</span>` : `<span style="color:#2ecc71">✅ Unlocked</span>`}
-                <span style="float:right">📏 4x4</span>
+
+            <div class="item-footer" style="font-size: 0.7em; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 8px;">
+                ${isLocked 
+                    ? `<span style="color:#ff4444; font-weight:bold;">🔒 LVL ${item.minLevel} REQUIRED</span>` 
+                    : `<span style="color:#00ff88; font-weight:bold;">✨ READY TO DEPLOY</span>`}
+                <span style="color: #444; font-weight: bold;">SIZE 4x4</span>
             </div>
         `;
         container.appendChild(div);
