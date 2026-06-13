@@ -1,17 +1,30 @@
-function placeChip(index) {
+function placeChip(clickedIndex) {
+    let w = 4, h = 4;
+    if (selectedTool === 'move' && firstSelection) {
+        w = firstSelection.bounds.w;
+        h = firstSelection.bounds.h;
+    }
+
+    const placement = typeof getPlacementCoords === 'function' ? getPlacementCoords(w, h) : null;
+    const index = placement ? placement.index : clickedIndex;
     const coords = getCoords(index);
     
     if (selectedTool === 'move' && firstSelection) {
-        if (isAreaFree(index, 4, 4)) {
+        // Verifica se o destino está dentro da grade e livre
+        if (isAreaFree(index, w, h, firstSelection.id)) {
             moveChip(firstSelection, index);
-            selectTool('move');
+            firstSelection = null;
+            document.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+            updateUI();
+        } else {
+            showFloatingText(gridElement.children[index], "BLOCKED", "#ff4444");
         }
         return;
     }
 
     if (['pan', 'link', 'move'].includes(selectedTool)) return;
     
-    const costs = { 'charger': 50, 'giver': 20, 'seller': 30, 'overclock': 80, 'storage': 40, 'splitter': 60, 'miner': 120, 'battery': 60, 'processor': 100, 'nexus': 250, 'market': 200, 'autosell': 300 };
+    const costs = { 'charger': 50, 'giver': 20, 'seller': 30, 'overclock': 80, 'storage': 40, 'splitter': 60, 'miner': 120, 'battery': 60, 'processor': 100, 'nexus': 250, 'market': 200, 'autosell': 300, 'vault': 150 };
     const cost = costs[selectedTool];
 
     if (selectedTool === 'nexus' && level < 6) return;
@@ -22,10 +35,12 @@ function placeChip(index) {
     if ((selectedTool === 'storage' || selectedTool === 'battery') && level < 2) return;
     if (selectedTool === 'splitter' && level < 2) return;
     if (selectedTool === 'processor' && level < 3) return;
+    if (selectedTool === 'vault' && level < 4) return;
 
-    if (cost && money >= cost && coords.y <= gridSize - 4 && coords.x <= gridSize - 4 && isAreaFree(index, 4, 4)) {
+    if (cost && money >= cost && coords.y <= gridSize - h && coords.x <= gridSize - w && isAreaFree(index, w, h)) {
         money -= cost;
         createChip(selectedTool, index, 4, 4);
+        showFloatingText(gridElement.children[index], `-$${cost}`, "#ff4444");
         updateUI();
     }
 }
@@ -67,6 +82,7 @@ function createChip(type, index, w, h, existingId = null, extraPorts = 0) {
     if (type === 'overclock') portsHTML = '<div class="port in energy"></div><div class="port out speed"></div>';
     if (type === 'processor') portsHTML = '<div class="port in power" style="left:30%"></div><div class="port in data" style="left:70%"></div><div class="port out data"></div>';
     if (type === 'storage') portsHTML = '<div class="port in data"></div><div class="port out data"></div>';
+    if (type === 'vault') portsHTML = '<div class="port in data"></div><div class="port out data"></div>';
     if (type === 'nexus') portsHTML = '<div class="port in power"></div><div class="port out energy" style="left:30%"></div><div class="port out speed" style="left:70%"></div>';
     if (type === 'splitter') {
         portsHTML = '<div class="port in data"></div>';
@@ -78,14 +94,37 @@ function createChip(type, index, w, h, existingId = null, extraPorts = 0) {
     }
     if (type === 'autosell') portsHTML = '';
 
-    let internalHTML = `<div style="pointer-events:none; z-index:1;">${type.toUpperCase()}<br><span class="status"></span></div>`;
+    let internalHTML = `
+        <div style="pointer-events:none; z-index:1; display: flex; flex-direction: column; align-items: center; gap: 2px;">
+            <div style="font-size: 0.6em; opacity: 0.5; font-weight: 900; letter-spacing: 1.5px;">${type.toUpperCase()}</div>
+            <div class="status" style="font-size: 0.7em; font-weight: bold; display: flex; align-items: center;"></div>
+        </div>`;
     if (type === 'battery') {
         internalHTML += `<div class="energy-bar-container"><div class="energy-bar-fill" id="energy-${chipId}"></div></div>`;
     }
     if (type === 'storage') {
         internalHTML += `<div class="energy-bar-container" style="border-color: #a855f7;"><div class="energy-bar-fill" id="data-bar-${chipId}" style="background: #a855f7;"></div></div>`;
     }
+    if (type === 'vault') {
+        internalHTML += `<div class="energy-bar-container" style="border-color: #00d4ff;"><div class="energy-bar-fill" id="data-bar-${chipId}" style="background: #00d4ff;"></div></div>`;
+    }
     div.innerHTML = portsHTML + internalHTML;
+
+    const chipObj = {
+        id: chipId,
+        type,
+        element: div,
+        occupiedIndices: occupied,
+        bounds: { x: coords.x, y: coords.y, w, h },
+        powered: false,
+        data: 0,
+        overclocked: false,
+        energy: type === 'battery' ? 0 : undefined,
+        maxData: type === 'storage' ? 200 : (type === 'vault' ? 1000 : undefined),
+        isCharging: type === 'battery' ? true : undefined,
+        active: type === 'autosell' ? false : undefined,
+        extraPorts: type === 'splitter' ? extraPorts : undefined
+    };
 
     if (type === 'splitter') {
         const btn = document.createElement('button');
@@ -136,29 +175,18 @@ function createChip(type, index, w, h, existingId = null, extraPorts = 0) {
         handleChipClick(chipObj);
     });
     
+    // Efeito visual de pulinho ao ser criado
+    div.classList.add('chip-hop');
+    setTimeout(() => div.classList.remove('chip-hop'), 400);
+
     gridElement.appendChild(div);
 
-    const chipObj = {
-        id: chipId,
-        type,
-        element: div,
-        occupiedIndices: occupied,
-        bounds: { x: coords.x, y: coords.y, w, h },
-        powered: false,
-        data: 0,
-        overclocked: false,
-        energy: type === 'battery' ? 0 : undefined,
-        maxData: type === 'storage' ? 200 : undefined,
-        isCharging: type === 'battery' ? true : undefined,
-        active: type === 'autosell' ? false : undefined,
-        extraPorts: type === 'splitter' ? extraPorts : undefined
-    };
     chips.push(chipObj);
 }
 
 function moveChip(chip, newIndex) {
     const coords = getCoords(newIndex);
-    const w = 4, h = 4;
+    const { w, h } = chip.bounds;
     const occupied = [];
     for (let i = 0; i < w; i++) {
         for (let j = 0; j < h; j++) {
@@ -171,7 +199,15 @@ function moveChip(chip, newIndex) {
     chip.element.style.left = (coords.x * 52) + 'px';
     chip.element.style.top = (coords.y * 52) + 'px';
     
+    // Efeito visual de pulinho ao ser movido
+    chip.element.classList.add('chip-hop');
+    setTimeout(() => chip.element.classList.remove('chip-hop'), 400);
+
+    // Limpa estado de seleção
+    chip.element.classList.remove('selected');
     chip.element.oncontextmenu = (e) => showContextMenu(e, chip);
+    
+    if (typeof updatePlacementGhost === 'function') updatePlacementGhost();
 
     renderConnections();
     updateUI();
