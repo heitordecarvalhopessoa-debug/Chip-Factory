@@ -9,7 +9,7 @@ function togglePrestigeMenu() {
         overlay.id = 'prestige-overlay';
         Object.assign(overlay.style, {
             position: 'fixed', top: '0', left: '0', width: '100%', height: '100%',
-            background: 'rgba(0,0,0,0.85)', zIndex: '4999', display: 'none',
+            background: 'rgba(5,0,10,0.9)', zIndex: '4999', display: 'none',
             backdropFilter: 'blur(8px)', transition: 'opacity 0.3s ease'
         });
         overlay.onclick = togglePrestigeMenu;
@@ -19,9 +19,9 @@ function togglePrestigeMenu() {
         menu.id = 'prestige-menu';
         Object.assign(menu.style, {
             position: 'fixed', left: '50%', top: '50%', width: '450px',
-            maxWidth: '90vw', background: '#0a0a0a', border: '2px solid #ff00ff',
+            maxWidth: '90vw', background: '#050505', border: '1px solid #ff00ff',
             zIndex: '5000', padding: '30px', borderRadius: '12px',
-            boxShadow: '0 0 50px rgba(255,0,255,0.2)', color: 'white',
+            boxShadow: '0 0 60px rgba(255,0,255,0.15), inset 0 0 20px rgba(255,0,255,0.05)', color: 'white',
             transform: 'translate(-50%, -50%)', display: 'none', textAlign: 'center'
         });
         document.body.appendChild(menu);
@@ -52,7 +52,7 @@ function renderPrestigeMenu() {
         <h2 style="color: #ff00ff; margin-top: 0; letter-spacing: 3px;">SYSTEM RESET</h2>
         <p style="color: #aaa; font-size: 0.9em;">Rebuild the factory from scratch to gain permanent quantum stability.</p>
         
-        <div style="background: #111; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #333;">
+        <div style="background: rgba(255,0,255,0.03); padding: 25px; border-radius: 12px; margin: 20px 0; border: 1px solid rgba(255,0,255,0.1);">
             <div style="font-size: 0.8em; color: #888;">CURRENT BONUS</div>
             <div style="font-size: 1.5em; color: #00ff88; font-weight: bold;">x${prestigeMultiplier.toFixed(2)} Efficiency</div>
             <div style="font-size: 0.8em; color: #888; margin-top: 10px;">POTENTIAL POINTS</div>
