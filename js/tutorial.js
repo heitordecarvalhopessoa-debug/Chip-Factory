@@ -85,11 +85,9 @@ function createTutorialUI() {
         
         if (tutorialStep >= 0 && tutorialStep < tutorialSteps.length - 1) {
             if (tutorialSteps[tutorialStep].check()) {
-                // Visual effect for step completion
                 container.style.borderColor = '#ffff00';
                 container.style.boxShadow = '0 0 40px rgba(255, 255, 0, 0.4)';
                 
-                // Automatic progress with a small delay for the player to notice completion
                 const currentStep = tutorialStep;
                 tutorialStep++;
                 setTimeout(() => {
