@@ -38,7 +38,11 @@ setInterval(() => {
         
         if (conn.type === 'data' && conn.from.data > 0 && conn.from.type !== 'splitter' && (conn.from.type !== 'market' || conn.from.powered)) {
             
-            let transferAmount = (conn.from.type === 'storage' || conn.from.type === 'market') ? Math.min(conn.from.data, 5) : conn.from.data;
+            let rate = 5;
+            if (conn.from.type === 'vault') rate = 20;
+            if (conn.from.type === 'market') rate = 10;
+            
+            let transferAmount = (conn.from.type === 'storage' || conn.from.type === 'vault' || conn.from.type === 'market') ? Math.min(conn.from.data, rate) : conn.from.data;
             let spaceAvailable = (conn.to.maxData !== undefined) ? (conn.to.maxData - conn.to.data) : Infinity;
             let actualTransfer = Math.min(transferAmount, spaceAvailable);
 
@@ -72,7 +76,6 @@ setInterval(() => {
                     if (c.data > 0) {
                         const amountToSplit = 1;
                         c.data -= amountToSplit;
-                        
                     if (conn.to.type === 'seller') {
                         processSale(amountToSplit, conn.to, 'splitter');
                     } else if (conn.to.type === 'market' && conn.to.powered) {
@@ -87,7 +90,9 @@ setInterval(() => {
         }
 
         if ((c.type === 'giver' || c.type === 'miner') && c.powered) {
-            const baseRate = c.type === 'miner' ? 3 : 1;
+            let baseRate = 1;
+            if (c.type === 'miner') baseRate = 3;
+
             const produceAmount = Math.floor((c.overclocked ? baseRate * 2 : baseRate) * prestigeMultiplier);
             c.data += produceAmount;
             c.element.classList.add('active-flow');
@@ -126,6 +131,10 @@ function refreshChipStatus(c) {
             status.innerHTML = `<div class="status-dot on"></div> ${c.data}/${c.maxData}`;
             const bar = document.getElementById(`data-bar-${c.id}`);
             if (bar) bar.style.width = Math.min(100, (c.data / c.maxData) * 100) + '%';
+    } else if (c.type === 'vault') {
+        status.innerHTML = `<div class="status-dot on" style="background:#00d4ff"></div> ${c.data}/${c.maxData}`;
+        const bar = document.getElementById(`data-bar-${c.id}`);
+        if (bar) bar.style.width = Math.min(100, (c.data / c.maxData) * 100) + '%';
     } else if (c.type === 'splitter') {
         status.innerHTML = `<div class="status-dot on"></div> ${c.data}d`;
     } else if (c.type === 'processor') {
