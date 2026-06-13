@@ -12,10 +12,27 @@ let tutorialStep = 0;
 
 let prestigeMultiplier = 1;
 let prestigePoints = 0;
+let researchedChips = [];
 
 const gridSize = 100;
 let chips = [];
 let connections = [];
+
+const shopItems = [
+    { id: 'charger', category: 'energy', name: '⚡ Charger', price: 50, desc: 'Base power source for the system.', minLevel: 1, io: { in: [], out: ['⚡ Power'] } },
+    { id: 'giver', category: 'production', name: '📦 Giver', price: 20, desc: 'Generates 1 basic data per second.', minLevel: 1, io: { in: ['⚡ Power', '🚀 Speed'], out: ['💾 Data'] } },
+    { id: 'seller', category: 'sales', name: '💰 Seller', price: 30, desc: 'Converts data and crystals into cash.', minLevel: 1, io: { in: ['💾 Data'], out: ['💵 Cash'] } },
+    { id: 'battery', category: 'energy', name: '🔋 Battery', price: 60, desc: 'Required to power Miners. Stores energy.', minLevel: 2, io: { in: ['⚡ Power'], out: ['🔋 Energy'] } },
+    { id: 'storage', category: 'logistics', name: '📦 Storage', price: 40, desc: 'Accumulates data for later processing.', minLevel: 2, io: { in: ['💾 Data'], out: ['💾 Data'] } },
+    { id: 'overclock', category: 'upgrade', name: '🚀 Overclock', price: 80, desc: 'Speeds up the production of adjacent chips.', minLevel: 3, io: { in: ['⚡ Power'], out: ['🚀 Speed'] } },
+    { id: 'splitter', category: 'logistics', name: '🌿 Splitter', price: 60, desc: 'Divides a data stream into multiple outputs.', minLevel: 2, io: { in: ['💾 Data'], out: ['💾 Data (x2)'] } },
+    { id: 'miner', category: 'production', name: '⛏️ Miner', price: 120, desc: 'Extracts valuable Crypto ($10/u). High demand.', minLevel: 4, io: { in: ['⚡ Power', '🚀 Speed'], out: ['💎 Crypto'] } },
+    { id: 'processor', category: 'upgrade', name: '⚙️ Processor', price: 100, desc: 'Refines data to increase its value (x5).', minLevel: 3, needsResearch: true, researchCost: 1500, io: { in: ['⚡ Power', '💾 Data'], out: ['💾 Data'] } },
+    { id: 'nexus', category: 'upgrade', name: '💠 Nexus', price: 250, desc: 'Late-game core. High cost, high reward.', minLevel: 6, needsResearch: true, researchCost: 5000, io: { in: ['⚡ Power'], out: ['🔋 Energy', '🚀 Speed'] } },
+    { id: 'vault', category: 'logistics', name: '🛡️ Vault', price: 150, desc: 'High-capacity data storage (1000 units).', minLevel: 4, needsResearch: true, researchCost: 2500, io: { in: ['💾 Data'], out: ['💾 Data'] } },
+    { id: 'market', category: 'sales', name: '🏪 Market Core', price: 200, desc: 'Stores data. When powered, sells through Sellers with 2.5x value.', minLevel: 5, io: { in: ['⚡ Power', '💾 Data'], out: ['💾 Data (Boosted)'] } },
+    { id: 'autosell', category: 'sales', name: '🕹️ Auto Sell', price: 300, desc: 'Global Toggle: Sells all data in the system instantly when active.', minLevel: 7, io: { in: [], out: [] } }
+];
 
 let achievements = [
     { 
@@ -90,6 +107,7 @@ function selectTool(tool) {
     document.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
     
     const cursors = {
+        'default': 'default', // Add default cursor
         'pan': 'grab',
         'link': 'crosshair',
         'delete': 'not-allowed',
@@ -97,12 +115,19 @@ function selectTool(tool) {
     }
     document.body.style.cursor = cursors[tool] || 'default';
 
+    if (typeof updatePlacementGhost === 'function') updatePlacementGhost();
     if (typeof renderShop === 'function') renderShop();
 }
 
 function changeZoom(delta) {
     zoom = Math.min(Math.max(0.2, zoom + delta), 1.5);
     updateViewport();
+}
+
+function updateGridHighlighting() {
+    document.querySelectorAll('.cell.valid-placement, .cell.invalid-placement').forEach(el => {
+        el.classList.remove('valid-placement', 'invalid-placement');
+    });
 }
 
 function updateViewport() {
@@ -113,12 +138,12 @@ function getCoords(index) {
     return { x: index % gridSize, y: Math.floor(index / gridSize) };
 }
 
-function isAreaFree(index, w, h) {
+function isAreaFree(index, w, h, ignoreChipId = null) {
     const coords = getCoords(index);
     for (let i = 0; i < w; i++) {
         for (let j = 0; j < h; j++) {
             const checkIdx = (coords.y + j) * gridSize + (coords.x + i);
-            if (chips.some(c => c.occupiedIndices.includes(checkIdx))) {
+            if (chips.some(c => c.id !== ignoreChipId && c.occupiedIndices.includes(checkIdx))) {
                 return false;
             }
         }
