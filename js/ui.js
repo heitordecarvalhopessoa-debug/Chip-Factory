@@ -1,3 +1,108 @@
+// Estilos globais para elementos da UI e notificações
+const uiStyles = document.createElement('style');
+uiStyles.innerHTML = `
+    @keyframes level-up-glow {
+        0% { box-shadow: 0 0 20px rgba(255,0,255,0.2), 0 0 50px rgba(0,0,0,0.9); transform: translate(-50%, -50%) scale(1); }
+        50% { box-shadow: 0 0 40px rgba(255,0,255,0.6), 0 0 50px rgba(0,0,0,0.9); transform: translate(-50%, -50%) scale(1.05); }
+        100% { box-shadow: 0 0 20px rgba(255,0,255,0.2), 0 0 50px rgba(0,0,0,0.9); transform: translate(-50%, -50%) scale(1); }
+    }
+    @keyframes active-pulse {
+        0% { filter: brightness(1); }
+        50% { filter: brightness(1.4) drop-shadow(0 0 8px currentColor); }
+        100% { filter: brightness(1); }
+    }
+    .active-flow {
+        animation: active-pulse 0.8s infinite ease-in-out;
+    }
+    .stat-item { transition: transform 0.2s ease; cursor: default; }
+    .stat-item:hover { transform: translateY(-2px); }
+    
+    .tool-item { 
+        transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+        border: 1px solid rgba(255,255,255,0.05) !important;
+        background: rgba(255,255,255,0.02) !important;
+    }
+    .tool-item:hover { transform: translateY(-3px); background: rgba(255,255,255,0.08) !important; border-color: rgba(255,255,255,0.2) !important; }
+    .tool-item.active { 
+        border-color: #00ff88 !important; 
+        box-shadow: 0 0 15px rgba(0,255,136,0.2) !important;
+        background: rgba(0,255,136,0.1) !important;
+    }
+
+    @keyframes chip-hop {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.1) translateY(-10px); }
+        100% { transform: scale(1); }
+    }
+    .chip-hop { animation: chip-hop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+
+    .chip.selected {
+        outline: 3px solid #00ff88 !important;
+        outline-offset: 4px;
+        box-shadow: 0 0 25px rgba(0, 255, 136, 0.6) !important;
+        z-index: 2000 !important;
+        animation: active-pulse 1s infinite alternate ease-in-out;
+        filter: brightness(1.2);
+    }
+
+    #context-menu {
+        background: rgba(10, 10, 10, 0.95) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.8) !important;
+        padding: 6px !important;
+        border-radius: 10px !important;
+        min-width: 170px !important;
+        backdrop-filter: blur(12px) !important;
+        transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.1), opacity 0.15s !important;
+        transform-origin: top left;
+    }
+    #context-menu div {
+        padding: 10px 14px !important;
+        font-size: 0.85em !important;
+        font-weight: 700 !important;
+        color: #999 !important;
+        cursor: pointer !important;
+        border-radius: 6px !important;
+        transition: all 0.15s !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 12px !important;
+        letter-spacing: 0.5px !important;
+    }
+    #context-menu div:hover {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #fff !important;
+        transform: translateX(4px);
+    }
+    #menu-delete:hover { color: #ff4444 !important; background: rgba(255, 68, 68, 0.1) !important; }
+
+    .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 6px;
+        box-shadow: 0 0 8px currentColor;
+    }
+    .status-dot.on { background-color: #00ff88; color: #00ff88; }
+    .status-dot.off { background-color: #ff4444; color: #ff4444; }
+    
+    .energy-bar-container {
+        width: 70%;
+        height: 4px;
+        background: rgba(0,0,0,0.6);
+        border-radius: 10px;
+        margin-top: 8px;
+        overflow: hidden;
+        border: 1px solid rgba(255,255,255,0.05);
+    }
+    .energy-bar-fill {
+        height: 100%;
+        transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+`;
+document.head.appendChild(uiStyles);
+
 let mouseX = 0, mouseY = 0;
 let activeMenuChip = null;
 let lastMoney = money;
@@ -8,8 +113,68 @@ window.addEventListener('mousemove', (e) => {
     const rect = gridElement.getBoundingClientRect();
     mouseX = (e.clientX - rect.left) / zoom;
     mouseY = (e.clientY - rect.top) / zoom;
+
     if (pendingPort) renderConnections();
+    updatePlacementGhost();
 });
+
+function updatePlacementGhost() {
+    let ghost = document.getElementById('placement-ghost');
+    
+    let w = 4, h = 4;
+    let isMoving = selectedTool === 'move' && firstSelection;
+    const buildTools = shopItems.map(i => i.id);
+    const isBuilding = selectedTool && buildTools.includes(selectedTool);
+
+    if (!isBuilding && !isMoving) {
+        if (ghost) ghost.remove();
+        return;
+    }
+
+    if (isMoving) {
+        w = firstSelection.bounds.w;
+        h = firstSelection.bounds.h;
+    }
+
+    if (!ghost) {
+        ghost = document.createElement('div');
+        ghost.id = 'placement-ghost';
+        Object.assign(ghost.style, {
+            position: 'absolute',
+            pointerEvents: 'none',
+            zIndex: '1000',
+            border: '2px dashed',
+            boxSizing: 'border-box',
+            borderRadius: '4px',
+            transition: 'transform 0.05s ease-out'
+        });
+        gridElement.appendChild(ghost);
+    }
+
+    const gridX = Math.floor(mouseX / 52);
+    const gridY = Math.floor(mouseY / 52);
+    
+    // Garante que o ghost fique dentro dos limites
+    const clampedX = Math.min(Math.max(0, gridX), gridSize - 4);
+    const clampedY = Math.min(Math.max(0, gridY), gridSize - 4);
+    const index = clampedY * gridSize + clampedX;
+
+    const free = isAreaFree(index, 4, 4);
+    
+    ghost.style.left = (clampedX * 52) + 'px';
+    ghost.style.top = (clampedY * 52) + 'px';
+    ghost.style.borderColor = free ? '#00ff88' : '#ff4444';
+    ghost.style.background = free ? 'rgba(0, 255, 136, 0.15)' : 'rgba(255, 68, 68, 0.15)';
+    ghost.style.boxShadow = free ? '0 0 15px rgba(0, 255, 136, 0.3)' : '0 0 15px rgba(255, 68, 68, 0.3)';
+}
+
+function getPlacementCoords(w = 4, h = 4) {
+    const gridX = Math.floor(mouseX / 52);
+    const gridY = Math.floor(mouseY / 52);
+    const clampedX = Math.min(Math.max(0, gridX), gridSize - w);
+    const clampedY = Math.min(Math.max(0, gridY), gridSize - h);
+    return { index: clampedY * gridSize + clampedX };
+}
 
 function showContextMenu(e, chip) {
     e.preventDefault();
@@ -19,6 +184,8 @@ function showContextMenu(e, chip) {
     menu.style.display = 'block';
     menu.style.left = e.clientX + 'px';
     menu.style.top = e.clientY + 'px';
+    menu.style.opacity = '0';
+    requestAnimationFrame(() => { menu.style.opacity = '1'; menu.style.transform = 'scale(1)'; });
 }
 
 document.getElementById('menu-move').onclick = () => {
@@ -74,7 +241,6 @@ function updateUI() {
         lastTotalData = totalData;
     }
     
-    // Update Prestige Boost visibility and value
     const prestigeInfo = document.getElementById('prestige-boost-info');
     if (prestigeInfo) {
         if (prestigeMultiplier > 1) {
@@ -85,7 +251,13 @@ function updateUI() {
         }
     }
 
+    const labBtn = document.getElementById('btn-lab');
+    if (labBtn) {
+        labBtn.style.display = level >= 5 ? 'block' : 'none';
+    }
+
     if (typeof renderShop === 'function') renderShop();
+    if (typeof updateGridHighlighting === 'function') updateGridHighlighting();
 }
 
 function showFloatingText(parent, text, color) {
@@ -98,7 +270,7 @@ function showFloatingText(parent, text, color) {
         pointerEvents: 'none',
         zIndex: '100',
         fontSize: '1.2em',
-        textShadow: '0 0 8px rgba(0,0,0,0.8)',
+        textShadow: '0 2px 10px rgba(0,0,0,0.9)',
         transition: 'all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
     });
     
@@ -113,7 +285,7 @@ function showFloatingText(parent, text, color) {
     
     requestAnimationFrame(() => {
         const tilt = (Math.random() - 0.5) * 20;
-        el.style.transform = `translateY(-60px) scale(1.4) rotate(${tilt}deg)`;
+        el.style.transform = `translateY(-100px) scale(1.8) rotate(${tilt}deg)`;
         el.style.opacity = '0';
     });
     setTimeout(() => el.remove(), 800);
@@ -154,7 +326,8 @@ function showLevelUpNotification(newLevel, unlockedItems) {
         pointerEvents: 'none',
         opacity: '0',
         transition: 'all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-        boxShadow: '0 0 50px rgba(0,0,0,0.9), 0 0 20px rgba(255,0,255,0.2)'
+        boxShadow: '0 0 50px rgba(0,0,0,0.9), 0 0 20px rgba(255,0,255,0.2)',
+        animation: 'level-up-glow 2s infinite ease-in-out'
     });
 
     document.body.appendChild(notification);
@@ -333,7 +506,7 @@ function addAchievementButton() {
     btn.id = 'btn-achievements';
     btn.innerHTML = '🏆';
     btn.title = 'Achievements';
-    btn.onclick = toggleAchievementMenu;
+    btn.onclick = () => toggleAchievementMenu();
     Object.assign(btn.style, {
         position: 'fixed',
         top: '20px',
@@ -355,10 +528,10 @@ function addPrestigeButton() {
     btn.id = 'btn-prestige';
     btn.innerHTML = '⚛️';
     btn.title = 'Prestige System';
-    btn.onclick = togglePrestigeMenu;
+    btn.onclick = () => togglePrestigeMenu();
     Object.assign(btn.style, {
         position: 'fixed',
-        top: '70px',
+        top: '75px',
         right: '20px',
         zIndex: '3000',
         padding: '10px',
@@ -368,6 +541,32 @@ function addPrestigeButton() {
         cursor: 'pointer',
         fontSize: '1.2em',
         boxShadow: '0 0 10px rgba(255, 0, 255, 0.2)'
+    });
+    document.body.appendChild(btn);
+}
+
+function addLaboratoryButton() {
+    if (document.getElementById('btn-lab')) return;
+    const btn = document.createElement('button');
+    btn.id = 'btn-lab';
+    btn.innerHTML = '🧪';
+    btn.title = 'Research Lab';
+    btn.onclick = () => toggleLaboratoryMenu();
+    Object.assign(btn.style, {
+        position: 'fixed',
+        top: '130px',
+        right: '20px',
+        zIndex: '3000',
+        padding: '10px',
+        background: '#222',
+        border: '1px solid #00d4ff',
+        borderRadius: '50%',
+        width: '45px',
+        height: '45px',
+        cursor: 'pointer',
+        fontSize: '1.2em',
+        boxShadow: '0 0 10px rgba(0, 212, 255, 0.2)',
+        display: 'none'
     });
     document.body.appendChild(btn);
 }
@@ -408,4 +607,5 @@ ws.onwheel = (e) => {
 selectTool('pan');
 addAchievementButton();
 addPrestigeButton();
+addLaboratoryButton();
 updateUI();
