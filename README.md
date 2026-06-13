@@ -16,6 +16,7 @@ The main gameplay cycle consists of:
 5. **Upgrade**: Improve your chip technology for maximum efficiency.
 6. **Optimize**: Perfect your system to reach the technological peak.
 7. **Prestige**: Reset your factory to unlock permanent and powerful bonuses.
+8. **Research**: Unlock advanced technologies and exclusive modules in the laboratory.
 
 ## Features
 
@@ -24,6 +25,7 @@ The main gameplay cycle consists of:
 - **Resource Management**: Balance expenses and earnings to keep your factory running.
 - **Logic Puzzles**: Challenge your mind by organizing connections in the best possible way.
 - **Prestige System**: A meta-progression layer where you sacrifice current progress for permanent multipliers and special rewards.
+- **Research Laboratory**: A specialized facility to unlock high-tier components and system enhancements.
 
 ## Technologies Used
 
