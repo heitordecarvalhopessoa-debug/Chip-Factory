@@ -10,6 +10,7 @@ function saveGame() {
         zoom: zoom,
         camX: camX,
         camY: camY,
+        researchedChips: researchedChips,
         chips: chips.map(c => ({
             id: c.id,
             type: c.type,
@@ -50,6 +51,7 @@ function loadGame() {
         prestigeMultiplier = data.prestigeMultiplier || 1;
         prestigePoints = data.prestigePoints || 0;
         tutorialStep = data.tutorialStep !== undefined ? data.tutorialStep : -1;
+        researchedChips = data.researchedChips || [];
 
         zoom = data.zoom || 1.0;
         camX = data.camX || 0;
