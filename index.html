@@ -35,8 +35,6 @@
 
     <div id="main-container">
         <div id="shop">
-            <h2>Hardware Shop</h2>
-
             <div id="shop-items-container"></div>
         </div>
 
@@ -56,9 +54,9 @@
         <div class="tool-item" title="Zoom Out" onclick="changeZoom(-0.1)">➖</div>
     </div>
 
-    <!-- Botões Laterais -->
     <button id="btn-achievements" onclick="toggleAchievementMenu()" title="Achievements" style="position: fixed; top: 20px; right: 20px; z-index: 3000; padding: 10px; background: #222; border: 1px solid #444; border-radius: 50%; cursor: pointer; font-size: 1.2em;">🏆</button>
     <button id="btn-prestige" onclick="togglePrestigeMenu()" title="Prestige System" style="position: fixed; top: 75px; right: 20px; z-index: 3000; padding: 10px; background: #222; border: 1px solid #ff00ff; border-radius: 50%; cursor: pointer; font-size: 1.2em; box-shadow: 0 0 10px rgba(255, 0, 255, 0.2);">⚛️</button>
+    <button id="btn-lab" onclick="toggleLaboratoryMenu()" title="Research Lab" style="position: fixed; top: 130px; right: 20px; z-index: 3000; padding: 10px; background: #222; border: 1px solid #00d4ff; border-radius: 50%; cursor: pointer; font-size: 1.2em; box-shadow: 0 0 10px rgba(0, 212, 255, 0.2); display: none;">🧪</button>
 
     <div id="context-menu" class="context-menu">
         <div class="context-menu-item" id="menu-move">🏗️ Move Chip</div>
@@ -68,6 +66,7 @@
     <script src="js/version.js"></script>
     <script src="js/state.js"></script>
     <script src="js/tutorial.js"></script>
+    <script src="js/laboratory.js"></script>
     <script src="js/prestige.js"></script>
     <script src="js/shop.js"></script>
     <script src="js/connections.js"></script>
