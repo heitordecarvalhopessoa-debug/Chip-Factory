@@ -18,8 +18,8 @@ function canConnect(source, target, type) {
             to: ['giver', 'miner']
         },
         'data': {
-            from: ['giver', 'miner', 'market', 'storage', 'splitter', 'processor'],
-            to: ['seller', 'market', 'storage', 'splitter', 'processor']
+            from: ['giver', 'miner', 'market', 'storage', 'splitter', 'processor', 'vault'],
+            to: ['seller', 'market', 'storage', 'splitter', 'processor', 'vault']
         }
     };
 
@@ -35,14 +35,62 @@ function handleChipClick(chip) {
             firstSelection = chip;
             chip.element.classList.add('selected');
         } else {
-            createLink(firstSelection, chip);
-            firstSelection.element.classList.remove('selected');
+            // Segundo chip clicado, tenta conectar
+            const sourceChip = firstSelection;
+            const targetChip = chip;
+
+            // Impede conectar um chip a si mesmo
+            if (sourceChip === targetChip) {
+                sourceChip.element.classList.remove('selected');
+                firstSelection = null;
+                return;
+            }
+
+            let connected = false;
+            const sourceOutPorts = sourceChip.element.querySelectorAll('.port.out');
+            const targetInPorts = targetChip.element.querySelectorAll('.port.in');
+
+            for (const sPort of sourceOutPorts) {
+                let sType = 'data';
+                if (sPort.classList.contains('power')) sType = 'power';
+                if (sPort.classList.contains('speed')) sType = 'speed';
+                if (sPort.classList.contains('energy')) sType = 'energy';
+
+                for (const tPort of targetInPorts) {
+                    let tType = 'data'; // Tipo padrão
+                    if (tPort.classList.contains('power')) tType = 'power';
+                    if (tPort.classList.contains('speed')) tType = 'speed';
+                    if (tPort.classList.contains('energy')) tType = 'energy';
+
+                    if (sType === tType && canConnect(sourceChip, targetChip, sType)) {
+                        const existingConnection = connections.find(c => 
+                            c.from === sourceChip && c.to === targetChip && 
+                            c.fromPort === sPort && c.toPort === tPort
+                        );
+                        if (!existingConnection) {
+                            connections.push({ from: sourceChip, fromPort: sPort, to: targetChip, toPort: tPort, type: sType });
+                            connected = true;
+                            break; 
+                        }
+                    }
+                }
+                if (connected) break; 
+            }
+            
+            sourceChip.element.classList.remove('selected');
             firstSelection = null;
+            renderConnections();
         }
     } else if (selectedTool === 'move') {
         document.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
-        firstSelection = chip;
-        chip.element.classList.add('selected');
+        if (firstSelection === chip) {
+            firstSelection = null; // Cancela se clicar no mesmo chip
+        } else {
+            firstSelection = chip;
+            chip.element.classList.add('selected');
+        }
+        if (typeof updatePlacementGhost === 'function') updatePlacementGhost();
+        if (typeof updateGridHighlighting === 'function') updateGridHighlighting();
     }
 }
 
