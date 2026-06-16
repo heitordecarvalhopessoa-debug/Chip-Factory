@@ -1,4 +1,3 @@
-// Injeção de estilos globais para animações da loja
 if (!document.getElementById('shop-animations-css')) {
     const style = document.createElement('style');
     style.id = 'shop-animations-css';
@@ -84,7 +83,6 @@ function renderShop() {
     const container = document.getElementById('shop-items-container');
     if (!container) return;
     
-    // O painel lateral onde a loja reside
     const shopPanel = container.parentElement;
 
     let header = document.getElementById('shop-header');
@@ -101,14 +99,12 @@ function renderShop() {
         shopPanel.insertBefore(header, shopPanel.firstChild);
     }
 
-    // Criamos um wrapper para o conteúdo que será minimizado "por completo"
     let body = document.getElementById('shop-body');
     if (!body) {
         body = document.createElement('div');
         body.id = 'shop-body';
         body.style = "display: flex; flex-direction: column; gap: 0; transition: opacity 0.3s ease;";
         
-        // Movemos os controles e o container para dentro do body
         const existingControls = document.getElementById('shop-controls');
         if (existingControls) body.appendChild(existingControls);
         body.appendChild(container);
@@ -156,7 +152,6 @@ function renderShop() {
         body.insertBefore(controls, container);
     }
 
-    // Atualiza apenas os estados visuais dos botões sem recriar o DOM
     controls.querySelectorAll('[data-filter]').forEach(btn => btn.classList.toggle('active', btn.dataset.filter === shopFilter));
     controls.querySelectorAll('[data-status]').forEach(btn => btn.classList.toggle('active', btn.dataset.status === shopStatusFilter));
     
@@ -198,10 +193,8 @@ function renderShop() {
         const aLocked = a.minLevel > level;
         const bLocked = b.minLevel > level;
 
-        // Always put locked items at the bottom regardless of sort
         if (aLocked !== bLocked) return aLocked ? 1 : -1;
 
-        // Apply the actual chosen sort method
         if (shopSort === 'price-asc') return a.price - b.price;
         if (shopSort === 'price-desc') return b.price - a.price;
         if (shopSort === 'level') return a.minLevel - b.minLevel;
