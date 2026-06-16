@@ -84,7 +84,7 @@ function handleChipClick(chip) {
     } else if (selectedTool === 'move') {
         document.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
         if (firstSelection === chip) {
-            firstSelection = null; // Cancela se clicar no mesmo chip
+            firstSelection = null;
         } else {
             firstSelection = chip;
             chip.element.classList.add('selected');
