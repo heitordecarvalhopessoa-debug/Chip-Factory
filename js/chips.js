@@ -1,5 +1,6 @@
 function placeChip(clickedIndex) {
     let w = 4, h = 4;
+    if (selectedTool === 'bridge') { w = 3; h = 3; }
     if (selectedTool === 'move' && firstSelection) {
         w = firstSelection.bounds.w;
         h = firstSelection.bounds.h;
@@ -22,11 +23,13 @@ function placeChip(clickedIndex) {
     }
 
     if (['pan', 'link', 'move'].includes(selectedTool)) return;
-    
-    const costs = { 'charger': 50, 'giver': 20, 'seller': 30, 'overclock': 80, 'storage': 40, 'splitter': 60, 'miner': 120, 'battery': 60, 'processor': 100, 'nexus': 250, 'market': 200, 'autosell': 300, 'vault': 150 };
+
+    const costs = { 'charger': 50, 'giver': 20, 'seller': 30, 'overclock': 80, 'storage': 40, 'splitter': 60, 'miner': 120, 'battery': 60, 'processor': 100, 'nexus': 250, 'market': 200, 'autosell': 300, 'vault': 150, 'bridge': 100, 'analytics': 150 };
     const cost = costs[selectedTool];
 
+    if (selectedTool === 'bridge' && level < 3) return;
     if (selectedTool === 'nexus' && level < 6) return;
+    if (selectedTool === 'analytics' && level < 3) return;
     if (selectedTool === 'market' && level < 5) return;
     if (selectedTool === 'overclock' && level < 3) return;
     if (selectedTool === 'miner' && level < 4) return;
@@ -38,7 +41,7 @@ function placeChip(clickedIndex) {
 
     if (cost && money >= cost && coords.y <= gridSize - h && coords.x <= gridSize - w && isAreaFree(index, w, h)) {
         money -= cost;
-        createChip(selectedTool, index, 4, 4);
+        createChip(selectedTool, index, w, h);
         showFloatingText(gridElement.children[index], `-$${cost}`, "#ff4444");
         updateUI();
     }
@@ -82,6 +85,7 @@ function createChip(type, index, w, h, existingId = null, extraPorts = 0) {
     if (type === 'processor') portsHTML = '<div class="port in power" style="left:30%"></div><div class="port in data" style="left:70%"></div><div class="port out data"></div>';
     if (type === 'storage') portsHTML = '<div class="port in data"></div><div class="port out data"></div>';
     if (type === 'vault') portsHTML = '<div class="port in data"></div><div class="port out data"></div>';
+    if (type === 'bridge') portsHTML = '<div class="port in neutral"></div><div class="port out neutral"></div>';
     if (type === 'nexus') portsHTML = '<div class="port in power"></div><div class="port out energy" style="left:30%"></div><div class="port out speed" style="left:70%"></div>';
     if (type === 'splitter') {
         portsHTML = '<div class="port in data"></div>';
@@ -91,6 +95,7 @@ function createChip(type, index, w, h, existingId = null, extraPorts = 0) {
             portsHTML += `<div class="port out data" style="left: ${pos}"></div>`;
         }
     }
+    if (type === 'analytics') portsHTML = '<div class="port in power"></div>';
     if (type === 'autosell') portsHTML = '';
 
     let internalHTML = `
@@ -107,6 +112,14 @@ function createChip(type, index, w, h, existingId = null, extraPorts = 0) {
     if (type === 'vault') {
         internalHTML += `<div class="energy-bar-container" style="border-color: #00d4ff;"><div class="energy-bar-fill" id="data-bar-${chipId}" style="background: #00d4ff;"></div></div>`;
     }
+    if (type === 'analytics') {
+        internalHTML = `
+            <div style="pointer-events:none; z-index:1; display: flex; flex-direction: column; align-items: center; width: 100%; height: 100%; padding: 5px;">
+                <div style="font-size: 0.5em; opacity: 0.7; font-weight: 900; margin-bottom: 2px;">INCOME ANALYTICS</div>
+                <canvas id="graph-${chipId}" width="160" height="80" style="width: 90%; height: 60%; background: rgba(0,0,0,0.4); border-radius: 4px; border: 1px solid rgba(255,255,255,0.1);"></canvas>
+                <div class="status" style="font-size: 0.6em; margin-top: 4px; font-weight: bold; color: #00ff88;"></div>
+            </div>`;
+    }
     div.innerHTML = portsHTML + internalHTML;
 
     const chipObj = {
@@ -122,7 +135,8 @@ function createChip(type, index, w, h, existingId = null, extraPorts = 0) {
         maxData: type === 'storage' ? 200 : (type === 'vault' ? 1000 : undefined),
         isCharging: type === 'battery' ? true : undefined,
         active: type === 'autosell' ? false : undefined,
-        extraPorts: type === 'splitter' ? extraPorts : undefined
+        extraPorts: type === 'splitter' ? extraPorts : undefined,
+        currentType: type === 'bridge' ? null : undefined
     };
 
     if (type === 'splitter') {
