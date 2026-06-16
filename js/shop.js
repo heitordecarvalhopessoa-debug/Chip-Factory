@@ -5,11 +5,11 @@ if (!document.getElementById('shop-animations-css')) {
         .shop-item {
             transition: transform 0.1s ease-out, box-shadow 0.1s ease-out, border-color 0.1s ease-out;
             backface-visibility: hidden;
-            transform: perspective(1px) translateZ(0); /* Forces hardware acceleration */
+            transform: perspective(1px) translateZ(0);
         }
 
         .shop-item:not(.locked):hover {
-            transform: perspective(1px) scale(1.02) translateZ(0); /* Scale slightly on hover */
+            transform: perspective(1px) scale(1.02) translateZ(0);
             z-index: 10;
             border-color: rgba(0, 255, 136, 0.5) !important;
         }
@@ -37,10 +37,10 @@ if (!document.getElementById('shop-animations-css')) {
         .filter-btn { 
             transition: background 0.2s, color 0.2s, box-shadow 0.2s; 
             backface-visibility: hidden;
-            transform: perspective(1px) translateZ(0); /* Forces hardware acceleration */
+            transform: perspective(1px) translateZ(0);
         }
-        .filter-btn:hover { filter: brightness(1.2); } /* Brighten on hover */
-        .filter-btn.active { box-shadow: 0 0 12px currentColor; } /* Glow when active */
+        .filter-btn:hover { filter: brightness(1.2); }
+        .filter-btn.active { box-shadow: 0 0 12px currentColor; }
 
     `;
     document.head.appendChild(style);
@@ -74,7 +74,8 @@ function getCategoryColor(cat) {
         'production': '#fbbf24',
         'sales': '#00ff88',
         'logistics': '#a855f7',
-        'upgrade': '#ff00ff'
+        'upgrade': '#ff00ff',
+        'neutral': '#eeeeee'
     };
     return colors[cat] || '#888';
 }
@@ -128,6 +129,7 @@ function renderShop() {
                 <button class="filter-btn small" data-filter="sales" onclick="setShopFilter('sales')" style="flex: 1; border-color: ${getCategoryColor('sales')}">SALES</button>
                 <button class="filter-btn small" data-filter="logistics" onclick="setShopFilter('logistics')" style="flex: 1; border-color: ${getCategoryColor('logistics')}">LOGIC</button>
                 <button class="filter-btn small" data-filter="upgrade" onclick="setShopFilter('upgrade')" style="flex: 1; border-color: ${getCategoryColor('upgrade')}">UPGR</button>
+                <button class="filter-btn small" data-filter="neutral" onclick="setShopFilter('neutral')" style="flex: 1; border-color: ${getCategoryColor('neutral')}">NEUT</button>
             </div>
             
             <div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 15px;">
