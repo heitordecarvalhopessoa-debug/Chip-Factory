@@ -1,4 +1,3 @@
-// Estilos para animações do Laboratório
 if (!document.getElementById('lab-animations-css')) {
     const labStyles = document.createElement('style');
     labStyles.id = 'lab-animations-css';
@@ -62,7 +61,6 @@ function renderLaboratoryMenu() {
     
     const itemsToResearch = shopItems.filter(item => item.needsResearch);
 
-    // Sort: Unresearched first, then by required level
     itemsToResearch.sort((a, b) => {
         const aDone = researchedChips.includes(a.id);
         const bDone = researchedChips.includes(b.id);
