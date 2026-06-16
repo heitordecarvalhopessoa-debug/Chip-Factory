@@ -10,7 +10,6 @@ function placeChip(clickedIndex) {
     const coords = getCoords(index);
     
     if (selectedTool === 'move' && firstSelection) {
-        // Verifica se o destino está dentro da grade e livre
         if (isAreaFree(index, w, h, firstSelection.id)) {
             moveChip(firstSelection, index);
             firstSelection = null;
@@ -175,7 +174,6 @@ function createChip(type, index, w, h, existingId = null, extraPorts = 0) {
         handleChipClick(chipObj);
     });
     
-    // Efeito visual de pulinho ao ser criado
     div.classList.add('chip-hop');
     setTimeout(() => div.classList.remove('chip-hop'), 400);
 
@@ -198,12 +196,10 @@ function moveChip(chip, newIndex) {
     chip.bounds = { x: coords.x, y: coords.y, w, h };
     chip.element.style.left = (coords.x * 52) + 'px';
     chip.element.style.top = (coords.y * 52) + 'px';
-    
-    // Efeito visual de pulinho ao ser movido
+
     chip.element.classList.add('chip-hop');
     setTimeout(() => chip.element.classList.remove('chip-hop'), 400);
 
-    // Limpa estado de seleção
     chip.element.classList.remove('selected');
     chip.element.oncontextmenu = (e) => showContextMenu(e, chip);
     
