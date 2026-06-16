@@ -1,25 +1,27 @@
 function canConnect(source, target, type) {
     if (source === target) return false;
 
+    if (target.type === 'bridge') return true;
+
     if (source.type === 'charger' && target.type === 'seller') return false;
     if (source.type === 'seller' && target.type === 'charger') return false;
 
     const rules = {
         'power': {
-            from: ['charger'],
-            to: ['giver', 'battery', 'processor', 'market', 'nexus']
+            from: ['charger', 'bridge'],
+            to: ['giver', 'battery', 'processor', 'market', 'nexus', 'analytics']
         },
         'energy': {
-            from: ['battery', 'nexus'],
+            from: ['battery', 'nexus', 'bridge'],
             to: ['miner', 'overclock']
         },
         'speed': {
-            from: ['overclock', 'nexus'],
+            from: ['overclock', 'nexus', 'bridge'],
             to: ['giver', 'miner']
         },
         'data': {
-            from: ['giver', 'miner', 'market', 'storage', 'splitter', 'processor', 'vault'],
-            to: ['seller', 'market', 'storage', 'splitter', 'processor', 'vault']
+            from: ['giver', 'miner', 'market', 'storage', 'splitter', 'processor', 'vault', 'bridge'],
+            to: ['seller', 'market', 'storage', 'splitter', 'processor', 'vault', 'bridge']
         }
     };
 
@@ -130,6 +132,7 @@ document.addEventListener('click', (e) => {
     if (port.classList.contains('power')) type = 'power';
     if (port.classList.contains('speed')) type = 'speed';
     if (port.classList.contains('energy')) type = 'energy';
+    if (port.classList.contains('neutral')) type = 'neutral';
 
 
     if (!pendingPort) {
@@ -139,14 +142,14 @@ document.addEventListener('click', (e) => {
             port.style.outline = "2px solid white";
         }
     } else {
-        
-        if (!isOut && type === pendingPort.type && canConnect(pendingPort.chip, chip, type)) {
+        const effectiveType = pendingPort.type === 'neutral' ? type : pendingPort.type;
+        if (!isOut && (type === pendingPort.type || type === 'neutral' || pendingPort.type === 'neutral') && canConnect(pendingPort.chip, chip, effectiveType)) {
             connections.push({
                 from: pendingPort.chip,
                 fromPort: pendingPort.element,
                 to: chip,
                 toPort: port,
-                type: type
+                type: effectiveType
             });
             renderConnections();
         }
@@ -176,8 +179,12 @@ function renderConnections() {
         const startRect = pendingPort.element.getBoundingClientRect();
         const x1 = (startRect.left - gridRect.left + startRect.width / 2) / zoom;
         const y1 = (startRect.bottom - gridRect.top) / zoom;
-        
-        drawPath(x1, y1, mouseX, mouseY, pendingPort.type, true, pendingPort.chip.type);
+
+        let pendingType = pendingPort.type;
+        if (pendingPort.chip.type === 'bridge' && pendingPort.chip.currentType) {
+            pendingType = pendingPort.chip.currentType;
+        }
+        drawPath(x1, y1, mouseX, mouseY, pendingType, true, pendingPort.chip.type);
     }
 }
 
@@ -188,10 +195,16 @@ function drawPath(x1, y1, x2, y2, type, isPending, fromType, toType, connRef) {
         const midX = x1 + (x2 - x1) / 2;
         const d = `M ${x1} ${y1} L ${midX} ${y1} L ${midX} ${y2} L ${x2} ${y2}`;
 
-        let color = '#00ff88';
-        if (type === 'power')  color = '#00d4ff';
-        if (type === 'speed')  color = '#ffff00';
-        if (type === 'energy') color = '#ff4444';
+        let activeType = type;
+        if (fromType === 'bridge') {
+            activeType = (connRef && connRef.from.currentType) ? connRef.from.currentType : 'neutral';
+        }
+
+        let color = '#888888';
+        if (activeType === 'data')  color = '#00ff88';
+        if (activeType === 'power')  color = '#00d4ff';
+        if (activeType === 'speed')  color = '#ffff00';
+        if (activeType === 'energy') color = '#ff4444';
 
         path.setAttribute("d", d);
         path.setAttribute("fill", "none");
