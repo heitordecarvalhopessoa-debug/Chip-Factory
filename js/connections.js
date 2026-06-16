@@ -35,11 +35,9 @@ function handleChipClick(chip) {
             firstSelection = chip;
             chip.element.classList.add('selected');
         } else {
-            // Segundo chip clicado, tenta conectar
             const sourceChip = firstSelection;
             const targetChip = chip;
 
-            // Impede conectar um chip a si mesmo
             if (sourceChip === targetChip) {
                 sourceChip.element.classList.remove('selected');
                 firstSelection = null;
@@ -57,7 +55,7 @@ function handleChipClick(chip) {
                 if (sPort.classList.contains('energy')) sType = 'energy';
 
                 for (const tPort of targetInPorts) {
-                    let tType = 'data'; // Tipo padrão
+                    let tType = 'data';
                     if (tPort.classList.contains('power')) tType = 'power';
                     if (tPort.classList.contains('speed')) tType = 'speed';
                     if (tPort.classList.contains('energy')) tType = 'energy';
