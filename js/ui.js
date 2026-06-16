@@ -1,4 +1,3 @@
-// Estilos globais para elementos da UI e notificações
 const uiStyles = document.createElement('style');
 uiStyles.innerHTML = `
     @keyframes level-up-glow {
