@@ -1,9 +1,9 @@
-let money = 1000000;
+let money = 100;
 let selectedTool = null;
 let firstSelection = null;
 let pendingPort = null;
 let zoom = 1.0;
-let level = 10;
+let level = 1;
 let xp = 0;
 let xpTarget = 100;
 let camX = 0, camY = 0;
