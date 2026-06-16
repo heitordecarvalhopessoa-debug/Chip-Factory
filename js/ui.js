@@ -85,6 +85,7 @@ uiStyles.innerHTML = `
     }
     .status-dot.on { background-color: #00ff88; color: #00ff88; }
     .status-dot.off { background-color: #ff4444; color: #ff4444; }
+    .port.neutral { background-color: #888 !important; box-shadow: 0 0 5px #888 !important; }
     
     .energy-bar-container {
         width: 70%;
@@ -133,6 +134,8 @@ function updatePlacementGhost() {
     if (isMoving) {
         w = firstSelection.bounds.w;
         h = firstSelection.bounds.h;
+    } else if (selectedTool === 'bridge') {
+        w = 3; h = 3;
     }
 
     if (!ghost) {
@@ -153,12 +156,11 @@ function updatePlacementGhost() {
     const gridX = Math.floor(mouseX / 52);
     const gridY = Math.floor(mouseY / 52);
     
-    // Garante que o ghost fique dentro dos limites
     const clampedX = Math.min(Math.max(0, gridX), gridSize - 4);
     const clampedY = Math.min(Math.max(0, gridY), gridSize - 4);
     const index = clampedY * gridSize + clampedX;
 
-    const free = isAreaFree(index, 4, 4);
+    const free = isAreaFree(index, w, h);
     
     ghost.style.left = (clampedX * 52) + 'px';
     ghost.style.top = (clampedY * 52) + 'px';
