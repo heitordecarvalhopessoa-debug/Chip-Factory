@@ -76,7 +76,6 @@ function createTutorialUI() {
         updateTutorialDisplay();
     };
 
-    // Monitor progress
     const checkInterval = setInterval(() => {
         if (tutorialStep === -1) {
             clearInterval(checkInterval);
