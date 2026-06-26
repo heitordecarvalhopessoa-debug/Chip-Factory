@@ -1,8 +1,8 @@
-const GAME_VERSION = "0.7.0";
+const GAME_VERSION = "1.0.0";
 
 window.addEventListener('DOMContentLoaded', () => {
     const versionElement = document.createElement('div');
     versionElement.id = 'version-display';
-    versionElement.innerText = `BUILD v${GAME_VERSION}`;
+    versionElement.innerText = `VERSION v${GAME_VERSION}`;
     document.body.appendChild(versionElement);
 });
